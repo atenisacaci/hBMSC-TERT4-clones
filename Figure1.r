@@ -1,5 +1,6 @@
 ##Figure 1C
-# Barplot of fraction of bone formed for each cell line 
+#Load the following objects from https://osf.io/wxpgn/
+# Bar plot of fraction of bone formed for each cell line 
 Implants <- read.xlsx("Implants_all_clones.xlsx", 
                       sheetIndex = 1, header=TRUE)
 names(Implants)[2] <- "Data"
