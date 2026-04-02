@@ -376,7 +376,7 @@ library(ggplot2)
 library(dplyr)
 library(tidyverse)
 
-Truli_ALP <- read.xlsx("ALP_Truli_LogFC.xlsx", 
+Truli_ALP <- read.xlsx("Truli.xlsx", 
                        sheetIndex = 1, header=TRUE)
 
 
@@ -438,7 +438,7 @@ gain_fixed_truli <- gain_fixed
 
 
 ##Celastrol
-Celastrol_ALP <- read.xlsx("ALP_Celastrol_LogFC.xlsx", 
+Celastrol_ALP <- read.xlsx("Celastrol.xlsx", 
                        sheetIndex = 1, header=TRUE)
 df.summary <- Celastrol_ALP %>%
   group_by(Conditions) %>%
