@@ -2,14 +2,7 @@
 ######## Get packages for R
 
 conda activate r-4.0
-conda install -c statiskit libboost
-conda install -c conda-forge openmpi
-conda install -c conda-forge boost
-conda install -c bioconda r-monocle3
-conda install -c conda-forge r-cairo
-conda install -c bioconda bioconductor-scuttle
 R
-cd  ..cd
 # Get all the libraries
 
 if (!requireNamespace("BiocManager", quietly = TRUE))
@@ -30,7 +23,7 @@ BiocManager::install("biomaRt")
 BiocManager::install("MAST")
 BiocManager::install("limma")
 BiocManager::install("RANN")
-BiocManager::install("org.Mm.eg.db")
+BiocManager::install("org.Hs.eg.db")
 BiocManager::install("dplyr")
 BiocManager::install("clusterProfiler")
 BiocManager::install("rWikiPathways")
@@ -39,7 +32,6 @@ BiocManager::install("edgeR")
 BiocManager::install("glmnet")
 BiocManager::install("phateR")
 BiocManager::install("pcaMethods")
-BiocManager::install("slingshot")
 BiocManager::install("TSCAN")
 BiocManager::install("tradeSeq")
 BiocManager::install("scDblFinder")
@@ -56,13 +48,11 @@ BiocManager::install(c('BiocGenerics', 'DelayedArray', 'DelayedMatrixStats',
                        'limma', 'S4Vectors', 'SingleCellExperiment',
                        'SummarizedExperiment', 'batchelor', 'Matrix.utils'))
 install_github('cole-trapnell-lab/leidenbase')
-install_github('cole-trapnell-lab/monocle3')
 install_github("immunogenomics/lisi")
 
 if (!requireNamespace("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
 
-BiocManager::install("velociraptor")
 BiocManager::install("EnsDb.Hsapiens.v79")
 
 q()
@@ -103,9 +93,7 @@ library(glmnet)
 library(velociraptor)
 library(phateR)
 library(ElPiGraph.R)
-library(slingshot)
 library(TSCAN)
-library(monocle3)
 library(tradeSeq)
 library(seriation)
 library(scuttle)
@@ -214,6 +202,7 @@ colnames(CD8_old_data) <- paste("CD8_",colnames(CD8_old_data), sep="")
 colnames(DD8_data) <- paste("DD8_",colnames(DD8_data), sep="")
 colnames(Msc_BM_data) <- paste("Msc_",colnames(Msc_BM_data), sep="")
 
+##merge the data from te CD8 (new and previous sequencing)
 CD_data <- cbind(CD_data, CD8_old_data)
 colnames(CD_data) <- paste("CD_",colnames(CD_data), sep="")
 # Process gene list (downloaded from BioMart), keep only non-empty gene symbols and deduplicate.
@@ -303,7 +292,6 @@ DD8_data_sce <- SingleCellExperiment(list(counts=DD8_data))
 Msc_BM_data_sce <- SingleCellExperiment(list(counts=Msc_BM_data))
 
 # Testing proliferative genes
-
 par(mfrow=c(5,4))
 tmp <- counts(AD10_data_sce)
 hist(tmp[rownames(tmp)=="MKI67",], main="AD10 MKI67", ylim=c(0,50), breaks=seq(0,100,length=25))
@@ -770,14 +758,12 @@ Genes <- Genes[ Genes$Gene.type == "protein_coding",]
 Genes <- Genes[ !is.na(Genes$Gene.name),]
 Genes <- Genes[ duplicated(Genes$Gene.stable.ID) == F,]
 
-# Filter the sce objects and ambient genes
+# Filter the sce objects 
 AD10_data_sce <- AD10_data_sce[ which(rownames(AD10_data_sce) %in% Genes$Gene.name),] #15665 genes left
 CB_data_sce <- CB_data_sce[ which(rownames(CB_data_sce) %in% Genes$Gene.name),] # 15665 genes left
 CD_data_sce <- CD_data_sce[ which(rownames(CD_data_sce) %in% Genes$Gene.name),] # 15665 genes left
 DD8_data_sce <- DD8_data_sce[ which(rownames(DD8_data_sce) %in% Genes$Gene.name),] # 15665 genes left
 Msc_BM_data_sce <- Msc_BM_data_sce[ which(rownames(Msc_BM_data_sce) %in% Genes$Gene.name),] # 15665 genes left
-
-
 
 dim(AD10_data_sce)
 # 15665  5757
@@ -869,8 +855,6 @@ CB_data_sce  <- readRDS("CB_data_sce.rds")
 CD_data_sce  <- readRDS("CD_data_sce.rds")
 DD8_data_sce  <- readRDS("DD8_data_sce.rds")
 Msc_BM_data_sce  <- readRDS("Msc_BM_data_sce.rds")
-
-
 
 # AD10
 # Iteration 1 - Use all genes
@@ -1115,8 +1099,6 @@ dim(Tert)
 
 35523 10036 #1500 threshold detected
 
- AD10    CB    CD   CD8   DD8   Msc
- 5081 10495     7 36386  6151  2376
 
 AD10   CB   CD  DD8  Msc
 1600 2414 1482 2460 2080
@@ -1219,8 +1201,6 @@ Msc_BM_data_seurat <- as.Seurat(rescaled[[5]], counts = "counts", data = "logcou
 Tert <- merge(AD10_data_seurat, y=c(CB_data_seurat,CD_data_seurat,DD8_data_seurat, Msc_BM_data_seurat))
 Tert$Dataset <-gsub("_.*","", colnames(Tert))
 
- AD10    CB    CD   CD8   DD8   Msc
- 5081 10495     7 36386  6151  2376
 
 AD10   CB   CD  DD8  Msc
 1600 2414 1482 2460 2080
@@ -1462,6 +1442,11 @@ CD8.markers <- FindAllMarkers(CD8,only.pos = TRUE, min.pct = 0.25, logfc.thresho
 Msc <- subset(Tert, subset = Dataset == c('Msc'))
 Msc.markers <- FindAllMarkers(Msc,only.pos = TRUE, min.pct = 0.25, logfc.threshold = 0.25)
 
+saveRDS(AD10.markers, "AD10.markers.rds")
+saveRDS(DD8.markers, "DD8.markers.rds")
+saveRDS(CB4.markers, "CB4.markers.rds")
+saveRDS(CD8.markers, "CD8.markers.rds")
+saveRDS(Msc.markers, "Msc.markers.rds")
 
 AD10.markers  <- readRDS("AD10.markers.rds")
 DD8.markers  <- readRDS("DD8.markers.rds")
@@ -1587,6 +1572,4 @@ write.table(CB4.markers, "CB4.markers.txt", quote=F, sep="\t", col.names=T, row.
 write.table(CD8.markers, "CD8.markers.txt", quote=F, sep="\t", col.names=T, row.names=F)
 write.table(Msc.markers, "Msc.markers.txt", quote=F, sep="\t", col.names=T, row.names=F)
 write.table(Tert.markers, "Tert.markers.txt", quote=F, sep="\t", col.names=T, row.names=F)
-intersect_all <- function(a,b,...){
-  Reduce(intersect, list(a,b,...))
-}
+
