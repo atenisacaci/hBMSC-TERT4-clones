@@ -1573,3 +1573,142 @@ write.table(CD8.markers, "CD8.markers.txt", quote=F, sep="\t", col.names=T, row.
 write.table(Msc.markers, "Msc.markers.txt", quote=F, sep="\t", col.names=T, row.names=F)
 write.table(Tert.markers, "Tert.markers.txt", quote=F, sep="\t", col.names=T, row.names=F)
 
+##Raw data are generated from the in vitro assay by measuring cell viability and ALP activity 
+###Load the following objects from https://osf.io/wxpgn/
+##Celastrol treatment
+AD10_viability <- read.xlsx("AD10_Celastrol_viability.xlsx", 
+                       sheetIndex = 1, header=TRUE)
+AD10_celastrol <- read.xlsx("AD10_Celastrol.xlsx", 
+                       sheetIndex = 1, header=TRUE)
+DD8_viability <- read.xlsx("DD8_Celastrol_viability.xlsx", 
+                        sheetIndex = 1, header=TRUE)
+DD8_celastrol <- read.xlsx("DD8_Celastrol.xlsx", 
+                           sheetIndex = 1, header=TRUE)
+CB4_viability <- read.xlsx("CB4_Celastrol_viability.xlsx", 
+                           sheetIndex = 1, header=TRUE)
+CB4_celastrol <- read.xlsx("CB4_Celastrol.xlsx", 
+                           sheetIndex = 1, header=TRUE)
+CD8_viability <- read.xlsx("CD8_Celastrol_viability.xlsx", 
+                           sheetIndex = 1, header=TRUE)
+CD8_celastrol <- read.xlsx("CD8_Celastrol.xlsx", 
+                           sheetIndex = 1, header=TRUE)
+
+AD10_Celastrol_ALP <- AD10_celastrol / AD10_viability
+AD10_Celastrol_ALP_norm<- AD10_Celastrol_ALP[, c("DMSO", "X0.03uM")] / AD10_Celastrol_ALP$UT
+
+DD8_Celastrol_ALP <- DD8_celastrol / DD8_viability
+DD8_Celastrol_ALP_norm<- DD8_Celastrol_ALP[, c("DMSO", "X0.03uM")] / DD8_Celastrol_ALP$UT
+
+CB4_Celastrol_ALP <- CB4_celastrol / CB4_viability
+CB4_Celastrol_ALP_norm<- CB4_Celastrol_ALP[, c("DMSO", "X0.03uM")] / CB4_Celastrol_ALP$UT
+
+CD8_Celastrol_ALP <- CD8_celastrol / CD8_viability
+CD8_Celastrol_ALP_norm<- CD8_Celastrol_ALP[, c("DMSO", "X0.03uM")] / CD8_Celastrol_ALP$UT
+
+library(dplyr)
+library(tidyr)
+
+# Add an ID to each dataframe
+AD10_Celastrol_ALP_norm$CellLine <- "AD10"
+DD8_Celastrol_ALP_norm$CellLine <- "DD8"
+CB4_Celastrol_ALP_norm$CellLine <- "CB4"
+CD8_Celastrol_ALP_norm$CellLine <- "CD8"
+
+
+Celastrol_all <- bind_rows(AD10_Celastrol_ALP_norm, DD8_Celastrol_ALP_norm, CB4_Celastrol_ALP_norm, CD8_Celastrol_ALP_norm)
+
+
+Celastrol <- Celastrol_all %>%
+  pivot_longer(
+    cols = -CellLine,
+    names_to = "Treatment",
+    values_to = "Data"
+  )
+
+Celastrol <- Celastrol %>%
+  mutate(Conditions = paste(CellLine, Treatment, sep = "_"))
+
+Celastrol <- Celastrol %>%
+  select(Conditions, Data)
+
+
+Celastrol$Conditions <- gsub("X0\\.03uM", "0.03uM", Celastrol$Conditions)
+
+UT_df <- data.frame(
+  Conditions = "UT",
+  Data = rep(1, 4)  # number of replicates
+)
+
+Celastrol <- bind_rows(UT_df, Celastrol)
+Celastrol$Data <- as.numeric(gsub(",", ".", Celastrol$Data))
+library(writexl)
+write_xlsx(Celastrol, "C:\\Users\\acaci\\Desktop\\Clones\\Celastrol.xlsx")
+
+##Truli treatment 
+AD10_viability <- read.xlsx("AD10_Truli_viability.xlsx", 
+                       sheetIndex = 1, header=TRUE)
+AD10_Truli <- read.xlsx("AD10_Truli.xlsx", 
+                       sheetIndex = 1, header=TRUE)
+DD8_viability <- read.xlsx("DD8_Truli_viability.xlsx", 
+                        sheetIndex = 1, header=TRUE)
+DD8_Truli <- read.xlsx("DD8_Truli.xlsx", 
+                           sheetIndex = 1, header=TRUE)
+CB4_viability <- read.xlsx("CB4_Truli_viability.xlsx", 
+                           sheetIndex = 1, header=TRUE)
+CB4_Truli <- read.xlsx("CB4_Truli.xlsx", 
+                           sheetIndex = 1, header=TRUE)
+CD8_viability <- read.xlsx("CD8_Truli_viability.xlsx", 
+                           sheetIndex = 1, header=TRUE)
+CD8_Truli <- read.xlsx("CD8_Truli.xlsx", 
+                           sheetIndex = 1, header=TRUE)
+
+AD10_Truli_ALP <- AD10_Truli / AD10_viability
+AD10_Truli_ALP_norm<- AD10_Truli_ALP[, c("DMSO", "X0.125uM")] / AD10_Truli_ALP$UT
+
+DD8_Truli_ALP <- DD8_Truli / DD8_viability
+DD8_Truli_ALP_norm<- DD8_Truli_ALP[, c("DMSO", "X0.125uM")] / DD8_Truli_ALP$UT
+
+CB4_Truli_ALP <- CB4_Truli / CB4_viability
+CB4_Truli_ALP_norm<- CB4_Truli_ALP[, c("DMSO", "X0.125uM")] / CB4_Truli_ALP$UT
+
+CD8_Truli_ALP <- CD8_Truli / CD8_viability
+CD8_Truli_ALP_norm<- CD8_Truli_ALP[, c("DMSO", "X0.125uM")] / CD8_Truli_ALP$UT
+
+library(dplyr)
+library(tidyr)
+
+# Add an ID to each dataframe
+AD10_Truli_ALP_norm$CellLine <- "AD10"
+DD8_Truli_ALP_norm$CellLine <- "DD8"
+CB4_Truli_ALP_norm$CellLine <- "CB4"
+CD8_Truli_ALP_norm$CellLine <- "CD8"
+
+
+Truli_all <- bind_rows(AD10_Truli_ALP_norm, DD8_Truli_ALP_norm, CB4_Truli_ALP_norm, CD8_Truli_ALP_norm)
+
+
+Truli <- Truli_all %>%
+  pivot_longer(
+    cols = -CellLine,
+    names_to = "Treatment",
+    values_to = "Data"
+  )
+
+Truli <- Truli %>%
+  mutate(Conditions = paste(CellLine, Treatment, sep = "_"))
+
+Truli <- Truli %>%
+  select(Conditions, Data)
+
+
+Truli$Conditions <- gsub("X0\\.125uM", "0.125uM", Truli$Conditions)
+
+UT_df <- data.frame(
+  Conditions = "UT",
+  Data = rep(1, 4)  # number of replicates
+)
+
+Truli <- bind_rows(UT_df, Truli)
+Truli$Data <- as.numeric(gsub(",", ".", Truli$Data))
+library(writexl)
+write_xlsx(Truli, "C:\\Users\\acaci\\Desktop\\Clones\\Truli.xlsx")
