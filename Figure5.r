@@ -302,7 +302,7 @@ p1 + p2
 
 #Figure 5F
 ##Truli treatment
-Truli_ALP <- read.xlsx("Truli_Rep1.xlsx", 
+Truli_ALP <- read.xlsx("Truli.xlsx", 
                        sheetIndex = 1, header=TRUE)
 
 library(dplyr)
@@ -328,16 +328,33 @@ ggplot(Truli_ALP, aes(Conditions, Data)) + scale_x_discrete(limits = conditions)
     aes(ymin = Data-sd, ymax = Data+sd),
     data = df.summary, width = 0.2) 
 #check significance
-tmp <- read.xlsx("Truli_Rep1_tmp.xlsx", 
-                 sheetIndex = 1, header=TRUE)
 
-t.test(tmp$AD10_0.125uM,tmp$AD10_DMSO)
-t.test(tmp$DD8_0.125uM,tmp$DD8_DMSO)
-t.test(tmp$CB4_0.125uM,tmp$CB4_DMSO)
-t.test(tmp$CD8_0.125uM,tmp$CD8_DMSO)
+# AD10
+t.test(
+  Data ~ Conditions,
+  data = Truli_ALP %>% filter(Conditions %in% c("AD10_DMSO", "AD10_0.125uM"))
+)
+
+# DD8
+t.test(
+  Data ~ Conditions,
+  data = Truli_ALP %>% filter(Conditions %in% c("DD8_DMSO", "DD8_0.125uM"))
+)
+
+# CB4
+t.test(
+  Data ~ Conditions,
+  data = Truli_ALP %>% filter(Conditions %in% c("CB4_DMSO", "CB4_0.125uM"))
+)
+
+# CD8
+t.test(
+  Data ~ Conditions,
+  data = Truli_ALP %>% filter(Conditions %in% c("CD8_DMSO", "CD8_0.125uM"))
+)
 
 #Celastrol treatment
-Celastrol_ALP <- read.xlsx("Celastrol_Rep1.xlsx", 
+Celastrol_ALP <- read.xlsx("Celastrol.xlsx", 
                            sheetIndex = 1, header=TRUE)
 library(dplyr)
 df.summary <- Celastrol_ALP %>%
@@ -361,13 +378,31 @@ ggplot(Celastrol_ALP, aes(Conditions, Data)) + scale_x_discrete(limits = conditi
     aes(ymin = Data-sd, ymax = Data+sd),
     data = df.summary, width = 0.2) 
 	
-tmp <- read.xlsx("Celastrol_Rep1_tmp.xlsx", 
-                 sheetIndex = 1, header=TRUE)
+##check significance
 
-t.test(tmp$AD10_0.03uM,tmp$AD10_DMSO)
-t.test(tmp$DD8_0.03uM,tmp$DD8_DMSO)
-t.test(tmp$CB4_0.03uM,tmp$CB4_DMSO)
-t.test(tmp$CD8_0.03uM,tmp$CD8_DMSO)
+# AD10
+t.test(
+  Data ~ Conditions,
+  data = Celastrol_ALP %>% filter(Conditions %in% c("AD10_DMSO", "AD10_0.03uM"))
+)
+
+# DD8
+t.test(
+  Data ~ Conditions,
+  data = Celastrol_ALP %>% filter(Conditions %in% c("DD8_DMSO", "DD8_0.03uM"))
+)
+
+# CB4
+t.test(
+  Data ~ Conditions,
+  data = Celastrol_ALP %>% filter(Conditions %in% c("CB4_DMSO", "CB4_0.03uM"))
+)
+
+# CD8
+t.test(
+  Data ~ Conditions,
+  data = Celastrol_ALP %>% filter(Conditions %in% c("CD8_DMSO", "CD8_0.03uM"))
+)
 
 
 #Figure 5G
@@ -375,10 +410,6 @@ library("xlsx")
 library(ggplot2)
 library(dplyr)
 library(tidyverse)
-
-Truli_ALP <- read.xlsx("Truli.xlsx", 
-                       sheetIndex = 1, header=TRUE)
-
 
 df.summary <- Truli_ALP %>%
   group_by(Conditions) %>%
@@ -438,8 +469,6 @@ gain_fixed_truli <- gain_fixed
 
 
 ##Celastrol
-Celastrol_ALP <- read.xlsx("Celastrol.xlsx", 
-                       sheetIndex = 1, header=TRUE)
 df.summary <- Celastrol_ALP %>%
   group_by(Conditions) %>%
   summarise(
