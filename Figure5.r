@@ -225,7 +225,7 @@ add_median_band(y[,4:6], x=4:6, col_line="black",  col_fill="lightgrey")
 add_median_band(y[,7:9], x=7:9, col_line="black", col_fill="lightgrey")
 
 
-#Figure 5D
+#Figure 5D & 5E
 Tert <- readRDS("Tert_Subtypes.rds")
 Idents(Tert) <- "Dataset"
 #Vlnplot expression of Hippo compentency genes per each cell lines
@@ -241,25 +241,18 @@ Tert <- AddModuleScore(
 VlnPlot(Tert, features="ProgramScore1", group.by="Dataset", pt.size=0)
 
 #Vlnplot expression of Hippo target genes per each cell lines
-genes_of_interest <- c("CCN1", "PEA15", "NPPB","EPHA2", "NUAK2", "FAM107B","ANKRD1", "MYOF", "TSPAN4", "PARVA", "RBM14","CENATAC","GPRC5A","KRT7", "KRT18","HSPB8","CRY1","SAMD4A","SNAPC1","TPM1","DUSP14","LDLR",
+hippo_targets <- c("CCN1", "PEA15", "NPPB","EPHA2", "NUAK2", "FAM107B","ANKRD1", "MYOF", "TSPAN4", "PARVA", "RBM14","CENATAC","GPRC5A","KRT7", "KRT18","HSPB8","CRY1","SAMD4A","SNAPC1","TPM1","DUSP14","LDLR",
 "SYDE1", "NFKBID","CRIM1","KMT5A","RND3","AMOTL2","PIM1","CPA4","CYRIB","MIR622","UGCG","TCEAL9","PIM2","FLNA")
 
 ##Calculate the average expression levels of each program (cluster) on single cell level
 Tert <- AddModuleScore(
   Tert,
-  features = list(genes_of_interest),
+  features = list(hippo_targets),
   name = "ProgramScore"
 )
 VlnPlot(Tert, features="ProgramScore1", group.by="Dataset", pt.size=0)
 
-#Figure 5E
-#Featureplot of Hippo compentency and target genes 
-genes_of_interest <- c("NTRK2","TEAD1","PLCB1","PDGFRB","GNAS","TCF7L2","TCF7L1","PRKAR1A","PRKCE","IGF1R","GNAI2","PRKCH","SMAD3","CDH6","EGFR","SMAD2","GNAQ","SAV1","MAPK10","MAP4K3","CTNNA1","YWHAQ")
-
-hippo_targets <- c("CCN1", "PEA15", "NPPB","EPHA2", "NUAK2", "FAM107B","ANKRD1", "MYOF", "TSPAN4", "PARVA", "RBM14","CENATAC","GPRC5A","KRT7", "KRT18","HSPB8","CRY1","SAMD4A","SNAPC1","TPM1","DUSP14","LDLR",
-"SYDE1", "NFKBID","CRIM1","KMT5A","RND3","AMOTL2","PIM1","CPA4","CYRIB","MIR622","UGCG","TCEAL9","PIM2","FLNA")
-
-
+#Featureplot of Hippo compentency and target genes
 Tert <- AddModuleScore(
   Tert,
   features = list(hippo_targets, genes_of_interest),
