@@ -140,15 +140,15 @@ length(unique(df$Msc.Symbol.sq.))
 
 ## Figure 2E
 #Load the following objects 
-Counts_Focal Adhesion <- read.delim("Counts_Focal Adhesion.txt", h=T) 
-Counts_HIPPO <- read.delim("Counts_HIPPO.txt", h=T)
-Counts_IGF1 <- read.delim("Counts_IGF1.txt", h=T)
+Counts_PI3K_AKT_mTOR <- read.delim("Counts_PI3K_AKT_mTOR.txt", h=T) 
+Counts_Glutathione metabolism <- read.delim("Counts_Glutathione metabolism.txt", h=T)
+Counts_Ras signaling <- read.delim("Counts_Ras signaling.txt", h=T)
 Counts_Proliferative <- read.delim("Counts_Proliferative.txt", h=T)
-Counts_Glyco <- read.delim("Counts_Glyco.txt", h=T)
-Counts_G protein signaling <- read.delim("Counts_G protein signaling.txt", h=T)
+Counts_Purine metabolism <- read.delim("Counts_Purine metabolism.txt", h=T)
+Counts_Calcium reguation <- read.delim("Counts_Calcium reguation.txt", h=T)
 Counts_Parkin-Ubiquitin <- read.delim("Counts_Parkin-Ubiquitin.txt", h=T)
 Counts_OP <- read.delim("Counts_OP.txt", h=T)
-Counts_BMP <- read.delim("Counts_BMP.txt", h=T)
+Counts_TGF-b_BMP signalling <- read.delim("Counts_TGF-b_BMP signalling.txt", h=T)
 Counts_TF <- read.delim("Counts_TF.txt", h=T)
 Counts_WNT <- read.delim("Counts_WNT.txt", h=T)
 
@@ -159,137 +159,137 @@ CB4_markers <- read.delim("CB4.markers.txt", h=T)
 CD8_markers <- read.delim("CD8.markers.txt", h=T) 
 MSC_markers <- read.delim("Msc.markers.txt", h=T)
 
-x<-subset(AD10_markers, gene %in% Counts_Focal Adhesion$Gene)
-x0<-x[x$cluster== 'Focal adhesion signaling  ',]
+x<-subset(AD10_markers, gene %in% Counts_PI3K_AKT_mTOR$Gene)
+x0<-x[x$cluster== 'PI3K/AKT/mTOR - VitD3 signaling',]
 colnames(x0)[2] <- "logFC_AD10"
 colnames(x0)[7] <- "Gene"
 
-x<-subset(DD8_markers, gene %in% Counts_Focal Adhesion$Gene)
-x1<-x[x$cluster== 'Focal adhesion signaling',]
+x<-subset(DD8_markers, gene %in% Counts_FPI3K_AKT_mTOR$Gene)
+x1<-x[x$cluster== 'PI3K/AKT/mTOR - VitD3 signaling',]
 colnames(x1)[2] <- "logFC_DD8"
 colnames(x1)[7] <- "Gene"
 
-x<-subset(CB4_markers, gene %in% Counts_Focal Adhesion$Gene)
-x2<-x[x$cluster== 'Focal adhesion signaling ',]
+x<-subset(CB4_markers, gene %in% Counts_PI3K_AKT_mTOR$Gene)
+x2<-x[x$cluster== 'PI3K/AKT/mTOR - VitD3 signaling',]
 colnames(x2)[2] <- "logFC_CB4"
 colnames(x2)[7] <- "Gene"
 
-x<-subset(CD8_markers, gene %in% Counts_Focal Adhesion$Gene)
-x3<-x[x$cluster== 'Focal adhesion signaling ',]
+x<-subset(CD8_markers, gene %in% Counts_PI3K_AKT_mTOR$Gene)
+x3<-x[x$cluster== 'PI3K/AKT/mTOR - VitD3 signaling',]
 colnames(x3)[2] <- "logFC_CD8"
 colnames(x3)[7] <- "Gene"
 
-x<-subset(MSC_markers, gene %in% Counts_Focal Adhesion$Gene)
-x4<-x[x$cluster== 'Focal adhesion signaling',]
+x<-subset(MSC_markers, gene %in% Counts_PI3K_AKT_mTOR$Gene)
+x4<-x[x$cluster== 'PI3K/AKT/mTOR - VitD3 signaling',]
 colnames(x4)[2] <- "logFC_Msc"
 colnames(x4)[7] <- "Gene"
 
-x<-subset(Tert_markers, gene %in% Counts_Focal Adhesion$Gene)
+x<-subset(Tert_markers, gene %in% Counts_PI3K_AKT_mTOR$Gene)
 x5<-x[x$cluster== '0',]
 colnames(x5)[2] <- "logFC_ALL"
 colnames(x5)[7] <- "Gene"
 
-Focal Adhesion_0<- merge(Counts_Focal Adhesion,x0 ,by="Gene",all.x=TRUE, all.y=TRUE )
-Focal Adhesion_1<- merge(Focal Adhesion_0,x1 ,by="Gene",all.x=TRUE, all.y=TRUE )
-Focal Adhesion_2<- merge(Focal Adhesion_1,x2 ,by="Gene", all.x=TRUE, all.y=TRUE)
-Focal Adhesion_3<- merge(Focal Adhesion_2,x3 ,by="Gene", all.x=TRUE, all.y=TRUE)
-Focal Adhesion_4<- merge(Focal Adhesion_3, x4, by="Gene", all.x=TRUE, all.y=TRUE)
-Focal Adhesion_5<- merge(Focal Adhesion_4, x5, by="Gene", all.x=TRUE, all.y=TRUE)
+PI3K_AKT_mTOR_0<- merge(Counts_PI3K_AKT_mTOR,x0 ,by="Gene",all.x=TRUE, all.y=TRUE )
+PI3K_AKT_mTOR_1<- merge(PI3K_AKT_mTOR_0,x1 ,by="Gene",all.x=TRUE, all.y=TRUE )
+PI3K_AKT_mTOR_2<- merge(PI3K_AKT_mTOR_1,x2 ,by="Gene", all.x=TRUE, all.y=TRUE)
+PI3K_AKT_mTOR_3<- merge(PI3K_AKT_mTOR_2,x3 ,by="Gene", all.x=TRUE, all.y=TRUE)
+PI3K_AKT_mTOR_4<- merge(PI3K_AKT_mTOR_3, x4, by="Gene", all.x=TRUE, all.y=TRUE)
+PI3K_AKT_mTOR_5<- merge(PI3K_AKT_mTOR_4, x5, by="Gene", all.x=TRUE, all.y=TRUE)
 
 
-Focal Adhesion<- Focal Adhesion_5[,c(1,2,4,10,16,22,28,34)]
+PI3K_AKT_mTOR<- Focal Adhesion_5[,c(1,2,4,10,16,22,28,34)]
 
-Focal Adhesion[is.na(Focal Adhesion)] <- 0
+PI3K_AKT_mTOR[is.na(PI3K_AKT_mTOR)] <- 0
 
-x<-subset(AD10_markers, gene %in% Counts_HIPPO$Gene)
-x0<-x[x$cluster== 'Pathways Regulating Hippo Signaling',]
+x<-subset(AD10_markers, gene %in% Counts_Glutathione metabolism$Gene)
+x0<-x[x$cluster== 'Glutathione metabolism',]
 colnames(x0)[2] <- "logFC_AD10"
 colnames(x0)[7] <- "Gene"
 
 
-x<-subset(DD8_markers, gene %in% Counts_HIPPO$Gene)
-x1<-x[x$cluster== 'Pathways Regulating Hippo Signaling',]
+x<-subset(DD8_markers, gene %in% Counts_Glutathione metabolism$Gene)
+x1<-x[x$cluster== 'Glutathione metabolism',]
 colnames(x1)[2] <- "logFC_DD8"
 colnames(x1)[7] <- "Gene"
 
-x<-subset(CB4_markers, gene %in% Counts_HIPPO$Gene)
-x2<-x[x$cluster== 'Pathways Regulating Hippo Signaling',]
+x<-subset(CB4_markers, gene %in% Counts_Glutathione metabolism$Gene)
+x2<-x[x$cluster== 'Glutathione metabolism',]
 colnames(x2)[2] <- "logFC_CB4"
 colnames(x2)[7] <- "Gene"
 
-x<-subset(CD8_markers, gene %in% Counts_HIPPO$Gene)
-x3<-x[x$cluster== 'Pathways Regulating Hippo Signaling',]
+x<-subset(CD8_markers, gene %in% Counts_Glutathione metabolism$Gene)
+x3<-x[x$cluster== 'Glutathione metabolism',]
 colnames(x3)[2] <- "logFC_CD8"
 colnames(x3)[7] <- "Gene"
 
 
-x<-subset(MSC_markers, gene %in% Counts_HIPPO$Gene)
-x4<-x[x$cluster== 'Pathways Regulating Hippo Signaling',]
+x<-subset(MSC_markers, gene %in% Counts_Glutathione metabolism$Gene)
+x4<-x[x$cluster== 'Glutathione metabolism',]
 colnames(x4)[2] <- "logFC_Msc"
 colnames(x4)[7] <- "Gene"
 
-x<-subset(Tert_markers, gene %in% Counts_HIPPO$Gene)
+x<-subset(Tert_markers, gene %in% Counts_Glutathione metabolism$Gene)
 x5<-x[x$cluster== '1',]
 colnames(x5)[2] <- "logFC_ALL"
 colnames(x5)[7] <- "Gene"
 
-HIPPO_0<- merge(Counts_HIPPO,x0 ,by="Gene",all.x=TRUE, all.y=TRUE )
-HIPPO_1<- merge(HIPPO_0,x1 ,by="Gene",all.x=TRUE, all.y=TRUE )
-HIPPO_2<- merge(HIPPO_1,x2 ,by="Gene", all.x=TRUE, all.y=TRUE)
-HIPPO_3<- merge(HIPPO_2,x3 ,by="Gene", all.x=TRUE, all.y=TRUE)
-HIPPO_4<- merge(HIPPO_3, x4, by="Gene", all.x=TRUE, all.y=TRUE)
-HIPPO_5<- merge(HIPPO_4, x5, by="Gene", all.x=TRUE, all.y=TRUE)
+Glutathione metabolism_0<- merge(Counts_Glutathione metabolism,x0 ,by="Gene",all.x=TRUE, all.y=TRUE )
+Glutathione metabolism_1<- merge(Glutathione metabolism_0,x1 ,by="Gene",all.x=TRUE, all.y=TRUE )
+Glutathione metabolism_2<- merge(Glutathione metabolism_1,x2 ,by="Gene", all.x=TRUE, all.y=TRUE)
+Glutathione metabolism_3<- merge(Glutathione metabolism_2,x3 ,by="Gene", all.x=TRUE, all.y=TRUE)
+Glutathione metabolism_4<- merge(Glutathione metabolism_3, x4, by="Gene", all.x=TRUE, all.y=TRUE)
+Glutathione metabolism_5<- merge(Glutathione metabolism_4, x5, by="Gene", all.x=TRUE, all.y=TRUE)
 
 
-HIPPO <- HIPPO_5[,c(1,2,4,10,16,22,28,34)]
+Glutathione metabolism <- Glutathione metabolism_5[,c(1,2,4,10,16,22,28,34)]
 
-HIPPO[is.na(HIPPO)] <- 0
+Glutathione metabolism[is.na(Glutathione metabolism)] <- 0
 
 
 
-x<-subset(AD10_markers, gene %in% Counts_IGF1$Gene)
-x0<-x[x$cluster== 'IGF1−Akt signaling',]
+x<-subset(AD10_markers, gene %in% Counts_Ras signaling$Gene)
+x0<-x[x$cluster== 'Ras signaling',]
 colnames(x0)[2] <- "logFC_AD10"
 colnames(x0)[7] <- "Gene"
 
 
-x<-subset(DD8_markers, gene %in% Counts_IGF1$Gene)
-x1<-x[x$cluster== 'IGF1−Akt signaling',]
+x<-subset(DD8_markers, gene %in% Counts_Ras signaling$Gene)
+x1<-x[x$cluster== 'Ras signaling',]
 colnames(x1)[2] <- "logFC_DD8"
 colnames(x1)[7] <- "Gene"
 
-x<-subset(CB4_markers, gene %in% Counts_IGF1$Gene)
-x2<-x[x$cluster== 'IGF1−Akt signaling',]
+x<-subset(CB4_markers, gene %in% Counts_Ras signaling$Gene)
+x2<-x[x$cluster== 'Ras signaling',]
 colnames(x2)[2] <- "logFC_CB4"
 colnames(x2)[7] <- "Gene"
 
-x<-subset(CD8_markers, gene %in% Counts_IGF1$Gene)
-x3<-x[x$cluster== 'IGF1−Akt signaling',]
+x<-subset(CD8_markers, gene %in% Counts_Ras signaling$Gene)
+x3<-x[x$cluster== 'Ras signaling',]
 colnames(x3)[2] <- "logFC_CD8"
 colnames(x3)[7] <- "Gene"
 
 
-x<-subset(MSC_markers, gene %in% Counts_IGF1$Gene)
-x4<-x[x$cluster== 'IGF1−Akt signaling',]
+x<-subset(MSC_markers, gene %in% Counts_Ras signaling$Gene)
+x4<-x[x$cluster== 'Ras signaling',]
 colnames(x4)[2] <- "logFC_Msc"
 colnames(x4)[7] <- "Gene"
 
-x<-subset(Tert_markers, gene %in% Counts_IGF1$Gene)
+x<-subset(Tert_markers, gene %in% Counts_Ras signaling$Gene)
 x5<-x[x$cluster== '2',]
 colnames(x5)[2] <- "logFC_ALL"
 colnames(x5)[7] <- "Gene"
 
-IGF1_0<- merge(Counts_IGF1,x0 ,by="Gene",all.x=TRUE, all.y=TRUE )
-IGF1_1<- merge(IGF1_0,x1 ,by="Gene",all.x=TRUE, all.y=TRUE )
-IGF1_2<- merge(IGF1_1,x2 ,by="Gene", all.x=TRUE, all.y=TRUE)
-IGF1_3<- merge(IGF1_2,x3 ,by="Gene", all.x=TRUE, all.y=TRUE)
-IGF1_4<- merge(IGF1_3, x4, by="Gene", all.x=TRUE, all.y=TRUE)
-IGF1_5<- merge(IGF1_4, x5, by="Gene", all.x=TRUE, all.y=TRUE)
+Ras signaling_0<- merge(Counts_Ras signaling,x0 ,by="Gene",all.x=TRUE, all.y=TRUE )
+Ras signaling_1<- merge(Ras signaling_0,x1 ,by="Gene",all.x=TRUE, all.y=TRUE )
+Ras signaling_2<- merge(Ras signaling_1,x2 ,by="Gene", all.x=TRUE, all.y=TRUE)
+Ras signaling_3<- merge(Ras signaling_2,x3 ,by="Gene", all.x=TRUE, all.y=TRUE)
+Ras signaling_4<- merge(Ras signaling_3, x4, by="Gene", all.x=TRUE, all.y=TRUE)
+Ras signaling_5<- merge(Ras signaling_4, x5, by="Gene", all.x=TRUE, all.y=TRUE)
 
 
-IGF1 <- IGF1_5[,c(1,2,4,10,16,22,28,34)]
+Ras signaling <- Ras signaling_5[,c(1,2,4,10,16,22,28,34)]
 
-IGF1[is.na(IGF1)] <- 0
+Ras signaling[is.na(Ras signaling)] <- 0
 
 
 x<-subset(AD10_markers, gene %in% Counts_Proliferative$Gene)
@@ -337,75 +337,75 @@ Proliferative <- Proliferative_5[,c(1,2,4,10,16,22,28,34)]
 Proliferative[is.na(Proliferative)] <- 0
 
 
-x<-subset(AD10_markers, gene %in% Counts_Glyco$Gene)
-x0<-x[x$cluster== 'Glycolysis and Gluconeogenesis',]
+x<-subset(AD10_markers, gene %in% Counts_Purine metabolism$Gene)
+x0<-x[x$cluster== 'Purine metabolism',]
 colnames(x0)[2] <- "logFC_AD10"
 colnames(x0)[7] <- "Gene"
 
 
-x<-subset(DD8_markers, gene %in% Counts_Glyco$Gene)
-x1<-x[x$cluster== 'Glycolysis and Gluconeogenesis',]
+x<-subset(DD8_markers, gene %in% Counts_Purine metabolism$Gene)
+x1<-x[x$cluster== 'Purine metabolism',]
 colnames(x1)[2] <- "logFC_DD8"
 colnames(x1)[7] <- "Gene"
 
-x<-subset(CB4_markers, gene %in% Counts_Glyco$Gene)
-x2<-x[x$cluster== 'Glycolysis and Gluconeogenesis',]
+x<-subset(CB4_markers, gene %in% Counts_Purine metabolism$Gene)
+x2<-x[x$cluster== 'Purine metabolism',]
 colnames(x2)[2] <- "logFC_CB4"
 colnames(x2)[7] <- "Gene"
 
-x<-subset(CD8_markers, gene %in% Counts_Glyco$Gene)
-x3<-x[x$cluster== 'Glycolysis and Gluconeogenesis',]
+x<-subset(CD8_markers, gene %in% Counts_Purine metabolism$Gene)
+x3<-x[x$cluster== 'Purine metabolism',]
 colnames(x3)[2] <- "logFC_CD8"
 colnames(x3)[7] <- "Gene"
 
 
-x<-subset(MSC_markers, gene %in% Counts_Glyco$Gene)
-x4<-x[x$cluster== 'Glycolysis and Gluconeogenesis',]
+x<-subset(MSC_markers, gene %in% Counts_Purine metabolism$Gene)
+x4<-x[x$cluster== 'Purine metabolism',]
 colnames(x4)[2] <- "logFC_Msc"
 colnames(x4)[7] <- "Gene"
 
-x<-subset(Tert_markers, gene %in% Counts_Glyco$Gene)
+x<-subset(Tert_markers, gene %in% Counts_Purine metabolism$Gene)
 x5<-x[x$cluster== '4',]
 colnames(x5)[2] <- "logFC_ALL"
 colnames(x5)[7] <- "Gene"
 
-Glyco_0<- merge(Counts_Glyco,x0 ,by="Gene",all.x=TRUE, all.y=TRUE )
-Glyco_1<- merge(Glyco_0,x1 ,by="Gene",all.x=TRUE, all.y=TRUE )
-Glyco_2<- merge(Glyco_1,x2 ,by="Gene", all.x=TRUE, all.y=TRUE)
-Glyco_3<- merge(Glyco_2,x3 ,by="Gene", all.x=TRUE, all.y=TRUE)
-Glyco_4<- merge(Glyco_3, x4, by="Gene", all.x=TRUE, all.y=TRUE)
-Glyco_5<- merge(Glyco_4, x5, by="Gene", all.x=TRUE, all.y=TRUE)
+Purine metabolism_0<- merge(Counts_Purine metabolism,x0 ,by="Gene",all.x=TRUE, all.y=TRUE )
+Purine metabolism_1<- merge(Purine metabolism_0,x1 ,by="Gene",all.x=TRUE, all.y=TRUE )
+Purine metabolism_2<- merge(Purine metabolism_1,x2 ,by="Gene", all.x=TRUE, all.y=TRUE)
+Purine metabolism_3<- merge(Purine metabolism_2,x3 ,by="Gene", all.x=TRUE, all.y=TRUE)
+Purine metabolism_4<- merge(Purine metabolism_3, x4, by="Gene", all.x=TRUE, all.y=TRUE)
+Purine metabolism_5<- merge(Purine metabolism_4, x5, by="Gene", all.x=TRUE, all.y=TRUE)
 
 
-Glyco <- Glyco_5[,c(1,2,4,10,16,22,28,34)]
+Purine metabolism <- Purine metabolism_5[,c(1,2,4,10,16,22,28,34)]
 
-Glyco[is.na(Glyco)] <- 0
+Purine metabolism[is.na(Purine metabolism)] <- 0
 
 
-x<-subset(AD10_markers, gene %in% Counts_G protein signaling$Gene)
-x0<-x[x$cluster== 'G protein signaling',]
+x<-subset(AD10_markers, gene %in% Counts_Calcium reguation$Gene)
+x0<-x[x$cluster== 'Calcium reguation',]
 colnames(x0)[2] <- "logFC_AD10"
 colnames(x0)[7] <- "Gene"
 
 
-x<-subset(DD8_markers, gene %in% Counts_G protein signaling$Gene)
-x1<-x[x$cluster== 'G protein signaling',]
+x<-subset(DD8_markers, gene %in% Counts_Calcium reguation$Gene)
+x1<-x[x$cluster== 'Calcium reguation',]
 colnames(x1)[2] <- "logFC_DD8"
 colnames(x1)[7] <- "Gene"
 
-x<-subset(CB4_markers, gene %in% Counts_G protein signaling$Gene)
-x2<-x[x$cluster== 'G protein signaling',]
+x<-subset(CB4_markers, gene %in% Counts_Calcium reguation$Gene)
+x2<-x[x$cluster== 'Calcium reguation',]
 colnames(x2)[2] <- "logFC_CB4"
 colnames(x2)[7] <- "Gene"
 
-x<-subset(CD8_markers, gene %in% Counts_G protein signaling$Gene)
-x3<-x[x$cluster== 'G protein signaling',]
+x<-subset(CD8_markers, gene %in% Counts_Calcium reguation$Gene)
+x3<-x[x$cluster== 'Calcium reguation',]
 colnames(x3)[2] <- "logFC_CD8"
 colnames(x3)[7] <- "Gene"
 
 
-x<-subset(MSC_markers, gene %in% Counts_G protein signaling$Gene)
-x4<-x[x$cluster== 'G protein signaling',]
+x<-subset(MSC_markers, gene %in% Counts_Calcium reguation$Gene)
+x4<-x[x$cluster== 'Calcium reguation',]
 colnames(x4)[2] <- "logFC_Msc"
 colnames(x4)[7] <- "Gene"
 
@@ -414,17 +414,17 @@ x5<-x[x$cluster== '5',]
 colnames(x5)[2] <- "logFC_ALL"
 colnames(x5)[7] <- "Gene"
 
-G protein signaling_0<- merge(Counts_G protein signaling,x0 ,by="Gene",all.x=TRUE, all.y=TRUE )
-G protein signaling_1<- merge(G protein signaling_0,x1 ,by="Gene",all.x=TRUE, all.y=TRUE )
-G protein signaling_2<- merge(G protein signaling_1,x2 ,by="Gene", all.x=TRUE, all.y=TRUE)
-G protein signaling_3<- merge(G protein signaling_2,x3 ,by="Gene", all.x=TRUE, all.y=TRUE)
-G protein signaling_4<- merge(G protein signaling_3, x4, by="Gene", all.x=TRUE, all.y=TRUE)
-G protein signaling_5<- merge(G protein signaling_4, x5, by="Gene", all.x=TRUE, all.y=TRUE)
+Calcium reguation_0<- merge(Counts_Calcium reguation,x0 ,by="Gene",all.x=TRUE, all.y=TRUE )
+Calcium reguation_1<- merge(Calcium reguation_0,x1 ,by="Gene",all.x=TRUE, all.y=TRUE )
+Calcium reguation_2<- merge(Calcium reguation_1,x2 ,by="Gene", all.x=TRUE, all.y=TRUE)
+Calcium reguation_3<- merge(Calcium reguation_2,x3 ,by="Gene", all.x=TRUE, all.y=TRUE)
+Calcium reguation_4<- merge(Calcium reguation_3, x4, by="Gene", all.x=TRUE, all.y=TRUE)
+Calcium reguation_5<- merge(Calcium reguation_4, x5, by="Gene", all.x=TRUE, all.y=TRUE)
 
 
-G protein signaling <- G protein signaling_5[,c(1,2,4,10,16,22,28,34)]
+Calcium reguation <- Calcium reguation_5[,c(1,2,4,10,16,22,28,34)]
 
-G protein signaling[is.na(G protein signaling)] <- 0
+Calcium reguation[is.na(Calcium reguation)] <- 0
 
 
 x<-subset(AD10_markers, gene %in% Counts_Parkin-Ubiquitin$Gene)
@@ -517,34 +517,34 @@ OP <- OP_5[,c(1,2,4,10,16,22,28,34)]
 OP[is.na(OP)] <- 0
 
 
-x<-subset(AD10_markers, gene %in% Counts_BMP$Gene)
-x0<-x[x$cluster== 'BMP signalling',]
+x<-subset(AD10_markers, gene %in% Counts_TGF-b_BMP signalling$Gene)
+x0<-x[x$cluster== 'TGF-b_BMP signalling',]
 colnames(x0)[2] <- "logFC_AD10"
 colnames(x0)[7] <- "Gene"
 
 
-x<-subset(DD8_markers, gene %in% Counts_BMP$Gene)
-x1<-x[x$cluster== 'BMP signalling',]
+x<-subset(DD8_markers, gene %in% Counts_TGF-b_BMP signalling$Gene)
+x1<-x[x$cluster== 'TGF-b_BMP signalling',]
 colnames(x1)[2] <- "logFC_DD8"
 colnames(x1)[7] <- "Gene"
 
-x<-subset(CB4_markers, gene %in% Counts_BMP$Gene)
-x2<-x[x$cluster== 'BMP signalling',]
+x<-subset(CB4_markers, gene %in% Counts_TGF-b_BMP signalling$Gene)
+x2<-x[x$cluster== 'TGF-b_BMP signalling',]
 colnames(x2)[2] <- "logFC_CB4"
 colnames(x2)[7] <- "Gene"
 
-x<-subset(CD8_markers, gene %in% Counts_BMP$Gene)
-x3<-x[x$cluster== 'BMP signalling',]
+x<-subset(CD8_markers, gene %in% Counts_TGF-b_BMP signalling$Gene)
+x3<-x[x$cluster== 'TGF-b_BMP signalling',]
 colnames(x3)[2] <- "logFC_CD8"
 colnames(x3)[7] <- "Gene"
 
 
-x<-subset(MSC_markers, gene %in% Counts_BMP$Gene)
-x4<-x[x$cluster== 'BMP signalling',]
+x<-subset(MSC_markers, gene %in% Counts_TGF-b_BMP signalling$Gene)
+x4<-x[x$cluster== 'TGF-b_BMP signalling',]
 colnames(x4)[2] <- "logFC_Msc"
 colnames(x4)[7] <- "Gene"
 
-x<-subset(Tert_markers, gene %in% Counts_BMP$Gene)
+x<-subset(Tert_markers, gene %in% Counts_TGF-b_BMP signalling$Gene)
 x5<-x[x$cluster== '8',]
 colnames(x5)[2] <- "logFC_ALL"
 colnames(x5)[7] <- "Gene"
@@ -651,33 +651,33 @@ WNT <- WNT_5[,c(1,2,4,10,16,22,28,34)]
 WNT[is.na(WNT)] <- 0
 
 #Dot plot of marker genes across the cell lines
-Focaladhesion_freq <- as.data.frame(table(Focal Adhesion$Count)/nrow(Focal Adhesion)*100)
-Focaladhesion_freq$Cluster <- "Focal adhesion"
-HIPPO_freq <- as.data.frame(table(HIPPO$Count)/nrow(HIPPO)*100)
-HIPPO_freq$Cluster<- "HIPPO"
-IGF1_freq <- as.data.frame(table(IGF1$Count)/nrow(IGF1)*100)
-IGF1_freq$Cluster<- "IGF1"
+PI3K_AKT_mTOR_freq <- as.data.frame(table(PI3K_AKT_mTOR$Count)/nrow(PI3K_AKT_mTOR)*100)
+PI3K_AKT_mTOR_freq$Cluster <- "PI3K_AKT_mTOR"
+Glutathione metabolism_freq <- as.data.frame(table(Glutathione metabolism$Count)/nrow(Glutathione metabolism)*100)
+Glutathione metabolism_freq$Cluster<- "Glutathione metabolism"
+Ras signaling_freq <- as.data.frame(table(Ras signaling$Count)/nrow(Ras signaling)*100)
+Ras signaling_freq$Cluster<- "Ras signaling"
 Prolif_freq<- as.data.frame(table(Proliferative$Count)/nrow(Proliferative)*100)
 Prolif_freq$Cluster <-"Proliferation"
-Glyco_freq<- as.data.frame(table(Glyco$Count)/nrow(Glyco)*100)
-Glyco_freq$Cluster<- "Glycogenesis"
-Gprotein_freq<- as.data.frame(table(G protien signaling$Count)/nrow(G protien signaling)*100)
-Gprotein_freq$Cluster<- "G protein signaling"
+Purine metabolism_freq<- as.data.frame(table(Purine metabolism$Count)/nrow(Purine metabolism)*100)
+Purine metabolism_freq$Cluster<- "Purine metabolism"
+Calcium reguation_freq<- as.data.frame(table(Calcium reguation$Count)/nrow(Calcium reguation)*100)
+Calcium reguation_freq$Cluster<- "Calcium reguation"
 Ubiquitin_freq <- as.data.frame(table(Parkin-Ubiquitin$Count)/nrow(Parkin-Ubiquitin)*100)
 Ubiquitin_freq$Cluster <-"Ubiquitin"
 Oxhpos_freq <- as.data.frame(table(OP$Count)/nrow(OP)*100)
 Oxhpos_freq$Cluster <-"Oxphos"
-BMP_freq <- as.data.frame(table(BMP$Count)/nrow(BMP)*100)
+BMP_freq <- as.data.frame(table(TGF-b_BMP signalling$Count)/nrow(TGF-b_BMP signalling)*100)
 BMP_freq$Cluster <-"BMP"
 TF_freq<- as.data.frame(table(TF$Count)/nrow(TF)*100)
 TF_freq$Cluster<-"Translation G protien signalingctor"
 WNT_freq<- as.data.frame(table(WNT$Count)/nrow(WNT)*100)
 WNT_freq$Cluster<- "WNT"
-Freq_data_all <- rbind(Focaladhesion_freq, HIPPO_freq, IGF1_freq, Prolif_freq, Glyco_freq, Gprotein_freq,
+Freq_data_all <- rbind(PI3K_AKT_mTOR_freq, Glutathione metabolism_freq, Ras signaling_freq, Prolif_freq, Purine metabolism_freq, Calcium reguation_freq,
                        Ubiquitin_freq, Oxhpos_freq, BMP_freq, TF_freq, WNT_freq)
 
-Freq_data_all$Cluster <- G protien signalingctor(Freq_data_all$Cluster, levels = c("Focal adhesion","HIPPO","IGF1","Proliferation","Glycogenesis",
-                                                          "G protein signaling","Ubiquitin","Oxphos","BMP","Translation G protien signalingctor",
+Freq_data_all$Cluster <- G protien signalingctor(Freq_data_all$Cluster, levels = c("PI3K_AKT_mTOR","Glutathione metabolism","Ras signaling","Proliferation","Purine metabolism",
+                                                          "Calcium reguation","Ubiquitin","Oxphos","BMP","Translation G protien signalingctor",
                                                           "WNT"))
 
 
@@ -696,21 +696,21 @@ ggplot(Freq_data_all, aes(x = G protien signalingctor(Cluster),
 
 ##Figure 2F
 #Dotplot of marker genes per each cell line
-Focal Adhesion <- Focal Adhesion[order(-Focal Adhesion$Count),]
-Focal Adhesion_common<-Focal Adhesion[c(1:2),]
-Focal Adhesion_common$Cluster<- "Focal Adhesion"
+PI3K_AKT_mTOR <- PI3K_AKT_mTOR[order(-PI3K_AKT_mTOR$Count),]
+PI3K_AKT_mTOR_common<-PI3K_AKT_mTOR[c(1:2),]
+PI3K_AKT_mTOR_common$Cluster<- "PI3K_AKT_mTOR"
 
-HIPPO <- HIPPO[order(-HIPPO$Count),]
-HIPPO_common<-HIPPO[C(1:63),]
-HIPPO_common$Cluster<- "HIPPO"
+Glutathione metabolism <- Glutathione metabolism[order(-Glutathione metabolism$Count),]
+Glutathione metabolism_common<-Glutathione metabolism[C(1:63),]
+Glutathione metabolism_common$Cluster<- "Glutathione metabolism"
 
-Common<- merge(Focal Adhesion_common, HIPPO_common, all.x=TRUE, all.y=TRUE)
+Common<- merge(PI3K_AKT_mTOR_common, Glutathione metabolism_common, all.x=TRUE, all.y=TRUE)
 
-IGF1 <- IGF1[order(-IGF1$Count),]
-IGF1_common<-IGF1[C(1:2),]
-IGF1_common$Cluster<- "IGF1"
+Ras signaling <- Ras signaling[order(-Ras signaling$Count),]
+Ras signaling_common<-Ras signaling[C(1:2),]
+Ras signaling_common$Cluster<- "Ras signaling"
 
-Common<- merge(IGF1_common, Common, all.x=TRUE, all.y=TRUE)
+Common<- merge(Ras signaling_common, Common, all.x=TRUE, all.y=TRUE)
 
 Proliferative <- Proliferative[order(-Proliferative$Count),]
 Proliferative_common<-Proliferative[c(1:14),]
@@ -718,17 +718,17 @@ Proliferative_common$Cluster<- "Proliferative"
 
 Common<- merge(Proliferative_common, Common, all.x=TRUE, all.y=TRUE)
 
-Glyco <- Glyco[order(-Glyco$Count),]
-Glyco_common<-Glyco[c(1:13),]
-Glyco_common$Cluster<- "Glyco"
+Purine metabolism <- Purine metabolism[order(-Purine metabolism$Count),]
+Purine metabolism_common<-Purine metabolism[c(1:13),]
+Purine metabolism_common$Cluster<- "Purine metabolism"
 
-Common<- merge(Glyco_common, Common, all.x=TRUE, all.y=TRUE)
+Common<- merge(Purine metabolism_common, Common, all.x=TRUE, all.y=TRUE)
 
-G protien signaling <- G protien signaling[order(-G protien signaling$Count),]
-G protien signaling_common<-G protien signaling[c(1:171),]
-G protien signaling_common$Cluster<- "G protien signaling"
+Calcium reguation <- Calcium reguation[order(-Calcium reguation$Count),]
+Calcium reguation_common<-Calcium reguation[c(1:171),]
+Calcium reguation_common$Cluster<- "Calcium reguation"
 
-Common<- merge(G protien signaling_common, Common, all.x=TRUE, all.y=TRUE)
+Common<- merge(Calcium reguation_common, Common, all.x=TRUE, all.y=TRUE)
 
 Parkin-Ubiquitin <- Parkin-Ubiquitin[order(-Parkin-Ubiquitin$Count),]
 Parkin-Ubiquitin_common<-Parkin-Ubiquitin[c(1:6),]
@@ -772,9 +772,9 @@ dot_AD10 <- Common %>%
    Gene = G protien signalingctor(Gene, levels = genes_of_interest)
       )
 
-dot_AD10$Cluster <- G protien signalingctor(dot_AD10$Cluster, levels = rev(c("Focal Adhesion","HIPPO","IGF1","Proliferative","Glyco",
-                                                    "G protien signaling","Parkin-Ubiquitin","Oxphos","BMP","Translation G protien signalingctors",
-                                                    "WNT")))
+dot_AD10$Cluster <- G protien signalingctor(dot_AD10$Cluster, levels = rev(c("PI3K_AKT_mTOR","Glutathione metabolism","Ras signaling","Proliferation","Purine metabolism",
+                                                          "Calcium reguation","Ubiquitin","Oxphos","BMP","Translation G protien signalingctor",
+                                                          "WNT")))
 
 library(ggplot2)
 library(RColorBrewer)
@@ -819,9 +819,9 @@ dot_DD8 <- Common %>%
     Gene = G protien signalingctor(Gene, levels = genes_of_interest)
   )
 
-dot_DD8$Cluster <- G protien signalingctor(dot_DD8$Cluster, levels = rev(c("Focal Adhesion","HIPPO","IGF1","Proliferative","Glyco",
-                                                            "G protien signaling","Parkin-Ubiquitin","Oxphos","BMP","Translation G protien signalingctors",
-                                                            "WNT")))
+dot_DD8$Cluster <- G protien signalingctor(dot_DD8$Cluster, levels = rev(c("PI3K_AKT_mTOR","Glutathione metabolism","Ras signaling","Proliferation","Purine metabolism",
+                                                          "Calcium reguation","Ubiquitin","Oxphos","BMP","Translation G protien signalingctor",
+                                                          "WNT")))
 
 library(ggplot2)
 library(RColorBrewer)
@@ -866,9 +866,9 @@ dot_CB4 <- Common %>%
     Gene = G protien signalingctor(Gene, levels = genes_of_interest)
   )
 
-dot_CB4$Cluster <- G protien signalingctor(dot_CB4$Cluster, levels = rev(c("Focal Adhesion","HIPPO","IGF1","Proliferative","Glyco",
-                                                           "G protien signaling","Parkin-Ubiquitin","Oxphos","BMP","Translation G protien signalingctors",
-                                                           "WNT")))
+dot_CB4$Cluster <- G protien signalingctor(dot_CB4$Cluster, levels = rev(c("PI3K_AKT_mTOR","Glutathione metabolism","Ras signaling","Proliferation","Purine metabolism",
+                                                          "Calcium reguation","Ubiquitin","Oxphos","BMP","Translation G protien signalingctor",
+                                                          "WNT")))
 
 library(ggplot2)
 library(RColorBrewer)
@@ -913,9 +913,9 @@ dot_CD8 <- Common %>%
     Gene = G protien signalingctor(Gene, levels = genes_of_interest)
   )
 
-dot_CD8$Cluster <- G protien signalingctor(dot_CD8$Cluster, levels = rev(c("Focal Adhesion","HIPPO","IGF1","Proliferative","Glyco",
-                                                           "G protien signaling","Parkin-Ubiquitin","Oxphos","BMP","Translation G protien signalingctors",
-                                                           "WNT")))
+dot_CD8$Cluster <- G protien signalingctor(dot_CD8$Cluster, levels = rev(c("PI3K_AKT_mTOR","Glutathione metabolism","Ras signaling","Proliferation","Purine metabolism",
+                                                          "Calcium reguation","Ubiquitin","Oxphos","BMP","Translation G protien signalingctor",
+                                                          "WNT")))
 
 library(ggplot2)
 library(RColorBrewer)
@@ -954,4 +954,5 @@ ggplot(dot_CD8, aes(
     y = "Cluster"
   )
 
+# Final aesthetics were done in Illustrator
 # Final aesthetics were done in Illustrator
