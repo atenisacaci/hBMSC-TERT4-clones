@@ -1414,15 +1414,15 @@ for (i in 1:length(Pathways)){
 
 
 Tert$Subtype <- "NA"
-Tert@meta.data[Tert@meta.data$RNA_snn_res.0.15 %in% 0, "Subtype"] <- "Folcal adhesion signaling"
-Tert@meta.data[Tert@meta.data$RNA_snn_res.0.15 %in% 1, "Subtype"] <- "Pathways Regulating Hippo Signaling"
-Tert@meta.data[Tert@meta.data$RNA_snn_res.0.15 %in% 2, "Subtype"] <- "Factors and pathways affecting insulin−like growth factor (IGF1)−Akt signaling"
+Tert@meta.data[Tert@meta.data$RNA_snn_res.0.15 %in% 0, "Subtype"] <- "PI3K/AKT/mTOR - VitD3 signaling"
+Tert@meta.data[Tert@meta.data$RNA_snn_res.0.15 %in% 1, "Subtype"] <- "Gluthathione metabolism"
+Tert@meta.data[Tert@meta.data$RNA_snn_res.0.15 %in% 2, "Subtype"] <- "Ras signaling"
 Tert@meta.data[Tert@meta.data$RNA_snn_res.0.15 %in% 3, "Subtype"] <- "Proliferative"
-Tert@meta.data[Tert@meta.data$RNA_snn_res.0.15 %in% 4, "Subtype"] <- "Glycolysis and Gluconeogenesis"
-Tert@meta.data[Tert@meta.data$RNA_snn_res.0.15 %in% 5, "Subtype"] <- "G protein Signaling"
+Tert@meta.data[Tert@meta.data$RNA_snn_res.0.15 %in% 4, "Subtype"] <- "Purine metabolism"
+Tert@meta.data[Tert@meta.data$RNA_snn_res.0.15 %in% 5, "Subtype"] <- "Calcium reguation"
 Tert@meta.data[Tert@meta.data$RNA_snn_res.0.15 %in% 6, "Subtype"] <- "Parkin−Ubiquitin Proteasomal System"
 Tert@meta.data[Tert@meta.data$RNA_snn_res.0.15 %in% 7, "Subtype"] <- "Oxidative phosphorylation"
-Tert@meta.data[Tert@meta.data$RNA_snn_res.0.15 %in% 8, "Subtype"] <- "Bone Morphogenic Protein (BMP) Signalling and Regulation"
+Tert@meta.data[Tert@meta.data$RNA_snn_res.0.15 %in% 8, "Subtype"] <- "TGF-b / BMP signalling"
 Tert@meta.data[Tert@meta.data$RNA_snn_res.0.15 %in% 9, "Subtype"] <- "Translation factors"
 Tert@meta.data[Tert@meta.data$RNA_snn_res.0.15 %in% 10, "Subtype"] <- "Regulation of Wnt/B-catenin Signaling by Small Molecule Compounds"
 
@@ -1462,63 +1462,63 @@ CD8.markers <- CD8.markers[CD8.markers$p_val_adj < 0.05,]
 
 
 
-AD10_PI3K <- rownames(AD10.markers[AD10.markers$cluster=="Folcal adhesion PI3K−Akt−mTOR−signaling",])
-AD10_HIPPO <- rownames(AD10.markers[AD10.markers$cluster=="Pathways Regulating Hippo Signaling",])
-AD10_IGF1 <- rownames(AD10.markers[AD10.markers$cluster=="Factors and pathways affecting insulin−like growth factor (IGF1)−Akt signaling",])
+AD10_PI3K <- rownames(AD10.markers[AD10.markers$cluster=="PI3K/AKT/mTOR - VitD3 signaling",])
+AD10_Glutathione <- rownames(AD10.markers[AD10.markers$cluster=="Glutathione metabolism",])
+AD10_Ras <- rownames(AD10.markers[AD10.markers$cluster=="Ras signaling",])
 AD10_Proliferative <- rownames(AD10.markers[AD10.markers$cluster=="Proliferative",])
-AD10_Glyco <- rownames(AD10.markers[AD10.markers$cluster=="Glycolysis and Gluconeogenesis",])
-AD10_GPS <- rownames(AD10.markers[AD10.markers$cluster=="G protein Signaling",])
+AD10_Purine <- rownames(AD10.markers[AD10.markers$cluster=="Purine metabolism",])
+AD10_Calcium <- rownames(AD10.markers[AD10.markers$cluster=="Calcium reguation",])
 AD10_PUPS <- rownames(AD10.markers[AD10.markers$cluster=="Parkin−Ubiquitin Proteasomal System",])
 AD10_OP <- rownames(AD10.markers[AD10.markers$cluster=="Oxidative phosphorylation",])
-AD10_BMP <- rownames(AD10.markers[AD10.markers$cluster=="Bone Morphogenic Protein (BMP) Signalling and Regulation",])
+AD10_BMP <- rownames(AD10.markers[AD10.markers$cluster=="TGF-b / BMP signalling",])
 AD10_TF <- rownames(AD10.markers[AD10.markers$cluster=="Translation GPSctors",])
 AD10_WNT <- rownames(AD10.markers[AD10.markers$cluster=="Regulation of Wnt/B-catenin Signaling by Small Molecule Compounds",])
 
-DD8_PI3K <- rownames(DD8.markers[DD8.markers$cluster=="Folcal adhesion PI3K−Akt−mTOR−signaling",])
-DD8_HIPPO <- rownames(DD8.markers[DD8.markers$cluster=="Pathways Regulating Hippo Signaling",])
-DD8_IGF1 <- rownames(DD8.markers[DD8.markers$cluster=="Factors and pathways affecting insulin−like growth factor (IGF1)−Akt signaling",])
+DD8_PI3K <- rownames(DD8.markers[DD8.markers$cluster=="PI3K/AKT/mTOR - VitD3 signaling",])
+DD8_Glutathione <- rownames(DD8.markers[DD8.markers$cluster=="Glutathione metabolism",])
+DD8_Ras <- rownames(DD8.markers[DD8.markers$cluster=="Ras signaling",])
 DD8_Proliferative <- rownames(DD8.markers[DD8.markers$cluster=="Proliferative",])
-DD8_Glyco <- rownames(DD8.markers[DD8.markers$cluster=="Glycolysis and Gluconeogenesis",])
-DD8_GPS <- rownames(DD8.markers[DD8.markers$cluster=="G protein Signaling",])
+DD8_Purine <- rownames(DD8.markers[DD8.markers$cluster=="Purine metabolism",])
+DD8_Calcium <- rownames(DD8.markers[DD8.markers$cluster=="Calcium reguation",])
 DD8_PUPS <- rownames(DD8.markers[DD8.markers$cluster=="Parkin−Ubiquitin Proteasomal System",])
 DD8_OP <- rownames(DD8.markers[DD8.markers$cluster=="Oxidative phosphorylation",])
-DD8_BMP <- rownames(DD8.markers[DD8.markers$cluster=="Bone Morphogenic Protein (BMP) Signalling and Regulation",])
+DD8_BMP <- rownames(DD8.markers[DD8.markers$cluster=="TGF-b / BMP signalling",])
 DD8_TF <- rownames(DD8.markers[DD8.markers$cluster=="Translation GPSctors",])
 DD8_WNT <- rownames(DD8.markers[DD8.markers$cluster=="Regulation of Wnt/B-catenin Signaling by Small Molecule Compounds",])
 
-CB4_PI3K <- rownames(CB4.markers[CB4.markers$cluster=="Folcal adhesion PI3K−Akt−mTOR−signaling",])
-CB4_HIPPO <- rownames(CB4.markers[CB4.markers$cluster=="Pathways Regulating Hippo Signaling",])
-CB4_IGF1 <- rownames(CB4.markers[CB4.markers$cluster=="Factors and pathways affecting insulin−like growth factor (IGF1)−Akt signaling",])
+CB4_PI3K <- rownames(CB4.markers[CB4.markers$cluster=="PI3K/AKT/mTOR - VitD3 signaling",])
+CB4_Glutathione <- rownames(CB4.markers[CB4.markers$cluster=="Glutathione metabolism",])
+CB4_Ras <- rownames(CB4.markers[CB4.markers$cluster=="Ras signaling",])
 CB4_Proliferative <- rownames(CB4.markers[CB4.markers$cluster=="Proliferative",])
-CB4_Glyco <- rownames(CB4.markers[CB4.markers$cluster=="Glycolysis and Gluconeogenesis",])
-CB4_GPS <- rownames(CB4.markers[CB4.markers$cluster=="G protein Signaling",])
+CB4_Purine <- rownames(CB4.markers[CB4.markers$cluster=="Purine metabolism",])
+CB4_Calcium <- rownames(CB4.markers[CB4.markers$cluster=="Calcium reguation",])
 CB4_PUPS <- rownames(CB4.markers[CB4.markers$cluster=="Parkin−Ubiquitin Proteasomal System",])
 CB4_OP <- rownames(CB4.markers[CB4.markers$cluster=="Oxidative phosphorylation",])
-CB4_BMP <- rownames(CB4.markers[CB4.markers$cluster=="Bone Morphogenic Protein (BMP) Signalling and Regulation",])
+CB4_BMP <- rownames(CB4.markers[CB4.markers$cluster=="TGF-b / BMP signalling",])
 CB4_TF <- rownames(CB4.markers[CB4.markers$cluster=="Translation GPSctors",])
 CB4_WNT <- rownames(CB4.markers[CB4.markers$cluster=="Regulation of Wnt/B-catenin Signaling by Small Molecule Compounds",])
 
-CD8_PI3K <- rownames(CD8.markers[CD8.markers$cluster=="Folcal adhesion PI3K−Akt−mTOR−signaling",])
-CD8_HIPPO <- rownames(CD8.markers[CD8.markers$cluster=="Pathways Regulating Hippo Signaling",])
-CD8_IGF1 <- rownames(CD8.markers[CD8.markers$cluster=="Factors and pathways affecting insulin−like growth factor (IGF1)−Akt signaling",])
+CD8_PI3K <- rownames(CD8.markers[CD8.markers$cluster=="PI3K/AKT/mTOR - VitD3 signaling",])
+CD8_Glutathione <- rownames(CD8.markers[CD8.markers$cluster=="Glutathione metabolism",])
+CD8_Ras <- rownames(CD8.markers[CD8.markers$cluster=="Ras signaling",])
 CD8_Proliferative <- rownames(CD8.markers[CD8.markers$cluster=="Proliferative",])
-CD8_Glyco <- rownames(CD8.markers[CD8.markers$cluster=="Glycolysis and Gluconeogenesis",])
-CD8_GPS <- rownames(CD8.markers[CD8.markers$cluster=="G protein Signaling",])
+CD8_Purine <- rownames(CD8.markers[CD8.markers$cluster=="Purine metabolism",])
+CD8_Calcium <- rownames(CD8.markers[CD8.markers$cluster=="Calcium reguation",])
 CD8_PUPS <- rownames(CD8.markers[CD8.markers$cluster=="Parkin−Ubiquitin Proteasomal System",])
 CD8_OP <- rownames(CD8.markers[CD8.markers$cluster=="Oxidative phosphorylation",])
-CD8_BMP <- rownames(CD8.markers[CD8.markers$cluster=="Bone Morphogenic Protein (BMP) Signalling and Regulation",])
+CD8_BMP <- rownames(CD8.markers[CD8.markers$cluster=="TGF-b / BMP signalling",])
 CD8_TF <- rownames(CD8.markers[CD8.markers$cluster=="Translation GPSctors",])
 CD8_WNT <- rownames(CD8.markers[CD8.markers$cluster=="Regulation of Wnt/B-catenin Signaling by Small Molecule Compounds",])
 
-Msc_PI3K <- rownames(Msc.markers[Msc.markers$cluster=="Folcal adhesion PI3K−Akt−mTOR−signaling",])
-Msc_HIPPO <- rownames(Msc.markers[Msc.markers$cluster=="Pathways Regulating Hippo Signaling",])
-Msc_IGF1 <- rownames(Msc.markers[Msc.markers$cluster=="Factors and pathways affecting insulin−like growth factor (IGF1)−Akt signaling",])
+Msc_PI3K <- rownames(Msc.markers[Msc.markers$cluster=="PI3K/AKT/mTOR - VitD3 signaling",])
+Msc_Glutathione <- rownames(Msc.markers[Msc.markers$cluster=="Gluthathione metabolism",])
+Msc_Ras <- rownames(Msc.markers[Msc.markers$cluster=="Ras signaling",])
 Msc_Proliferative <- rownames(Msc.markers[Msc.markers$cluster=="Proliferative",])
-Msc_Glyco <- rownames(Msc.markers[Msc.markers$cluster=="Glycolysis and Gluconeogenesis",])
-Msc_GPS <- rownames(Msc.markers[Msc.markers$cluster=="G protein Signaling",])
+Msc_Purine <- rownames(Msc.markers[Msc.markers$cluster=="Purine metabolism",])
+Msc_Calcium <- rownames(Msc.markers[Msc.markers$cluster=="Calcium reguation",])
 Msc_PUPS <- rownames(Msc.markers[Msc.markers$cluster=="Parkin−Ubiquitin Proteasomal System",])
 Msc_OP <- rownames(Msc.markers[Msc.markers$cluster=="Oxidative phosphorylation",])
-Msc_BMP <- rownames(Msc.markers[Msc.markers$cluster=="Bone Morphogenic Protein (BMP) Signalling and Regulation",])
+Msc_BMP <- rownames(Msc.markers[Msc.markers$cluster=="TGF-b / BMP signalling",])
 Msc_TF <- rownames(Msc.markers[Msc.markers$cluster=="Translation GPSctors",])
 Msc_WNT <- rownames(Msc.markers[Msc.markers$cluster=="Regulation of Wnt/B-catenin Signaling by Small Molecule Compounds",])
 
@@ -1553,15 +1553,15 @@ print(gene_count_df)
 
 gene_count_df <- gene_count_df[order(-gene_count_df$Count),]
 
-write.table(gene_count_df, "Counts_Focal Adhesion.txt", quote=F, sep="\t", col.names=T, row.names=F)
-write.table(gene_count_df, "Counts_HIPPO.txt", quote=F, sep="\t", col.names=T, row.names=F)
-write.table(gene_count_df, "Counts_IGF1.txt", quote=F, sep="\t", col.names=T, row.names=F)
+write.table(gene_count_df, "Counts_PI3K_AKT_mTOR.txt", quote=F, sep="\t", col.names=T, row.names=F)
+write.table(gene_count_df, "Counts_Glutathione metabolism.txt", quote=F, sep="\t", col.names=T, row.names=F)
+write.table(gene_count_df, "Counts_Ras signaling.txt", quote=F, sep="\t", col.names=T, row.names=F)
 write.table(gene_count_df, "Counts_Proliferative.txt", quote=F, sep="\t", col.names=T, row.names=F)
-write.table(gene_count_df, "Counts_Glyco.txt", quote=F, sep="\t", col.names=T, row.names=F)
-write.table(gene_count_df, "Counts_G protein signaling.txt", quote=F, sep="\t", col.names=T, row.names=F)
+write.table(gene_count_df, "Counts_Purine metabolism.txt", quote=F, sep="\t", col.names=T, row.names=F)
+write.table(gene_count_df, "Counts_Calcium reguation.txt", quote=F, sep="\t", col.names=T, row.names=F)
 write.table(gene_count_df, "Counts_Parkin-Ubiquitin.txt", quote=F, sep="\t", col.names=T, row.names=F)
 write.table(gene_count_df, "Counts_OP.txt", quote=F, sep="\t", col.names=T, row.names=F)
-write.table(gene_count_df, "Counts_BMP.txt", quote=F, sep="\t", col.names=T, row.names=F)
+write.table(gene_count_df, "Counts_TGF-b_BMP signalling.txt", quote=F, sep="\t", col.names=T, row.names=F)
 write.table(gene_count_df, "Counts_TF.txt", quote=F, sep="\t", col.names=T, row.names=F)
 write.table(gene_count_df, "Counts_WNT.txt", quote=F, sep="\t", col.names=T, row.names=F)
 write.table(All_markers_final, "All_markers_final.txt", quote=F, sep="\t", col.names=T, row.names=F)
