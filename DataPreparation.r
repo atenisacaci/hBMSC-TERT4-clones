@@ -36,6 +36,8 @@ BiocManager::install("TSCAN")
 BiocManager::install("tradeSeq")
 BiocManager::install("scDblFinder")
 install.packages("seriation")
+install.packages("rstatix")
+install.packages("ggdendro")
 
 BiocManager::install("devtools")
 library(devtools)
@@ -107,6 +109,9 @@ library(DESeq2)
 library(edgeR)
 library(DEFormats)
 library(harmony)
+library(rstatix)
+library(ggdendro)
+
 
 AD10_data <- readRDS("AD10.dgecounts.rds")
 CB4_data <- readRDS("CB4.dgecounts.rds")
