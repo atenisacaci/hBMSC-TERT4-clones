@@ -11,6 +11,92 @@ DimPlot(Tert, reduction="umap", group.by="Subtype",label = TRUE, pt.size = .1)+ 
 DimPlot(Tert, reduction="umap", group.by="Dataset",label = TRUE, pt.size = .1)+ NoLegend() 
 
 ##Figure 2C
+##check MSC makeres in Clones dataset
+library(ggdendro)
+MSC_markers<-c("PDGFRA","NT5E","ENG","THY1", "CXCL12", "GREM1", "NGFR", "MCAM", "CXCR4", "LEPR","SDC2", "PRRX1","COL2A1","ADIPOQ","GLI1","SP7")
+
+Tert <- readRDS("Tert_Subtypes.rds")
+
+# Keep only markers present in the object
+MSC_markers <- intersect(MSC_markers, rownames(Tert))
+
+Idents(Tert) <- "Dataset"
+
+# Average expression per dataset
+avg_exp <- AverageExpression(Tert,features = MSC_markers,assays = "RNA")$RNA
+
+# Hierarchical clustering pnly on genes (rows)
+gene_dendro <- hclust(dist(avg_exp))
+
+gene_order <- gene_dendro$labels[gene_dendro$order]
+
+##add the dendogram 
+# Average expression
+avg_exp <- AverageExpression(Tert, features = MSC_markers)$RNA
+
+# Cluster genes
+gene_dist <- dist(avg_exp)
+gene_clust <- hclust(gene_dist)
+
+gene_order <- gene_clust$labels[gene_clust$order]
+
+# Convert dendrogram for plotting
+dend_data <- ggdendro::dendro_data(gene_clust)
+
+dend_plot <- ggdendrogram(gene_clust, rotate = FALSE) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# DotPlot with clustered genes
+dot <- DotPlot(Tert,features = gene_order,assay = "RNA")+
+               theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  
+# Combine the dotplot and the dendogram 
+dend_plot / dot
+
+##Figure 2D
+##check MSC makeres in Clones dataset
+MSC_markers<-c("PDGFRA","NT5E","ENG","THY1", "CXCL12", "GREM1", "NGFR", "MCAM", "CXCR4", "LEPR","SDC2", "PRRX1","COL2A1","ADIPOQ","GLI1","SP7")
+
+# Keep only markers present in the object
+MSC_markers <- intersect(MSC_markers, rownames(Tert))
+
+Idents(Tert) <- "RNA_snn_res.0.15"
+
+# Average expression per dataset
+avg_exp <- AverageExpression(Tert,features = MSC_markers,assays = "RNA")$RNA
+
+# Hierarchical clustering pnly on genes (rows)
+gene_dendro <- hclust(dist(avg_exp))
+
+gene_order <- gene_dendro$labels[gene_dendro$order]
+
+##add the dendogram 
+# Average expression
+avg_exp <- AverageExpression(Tert, features = MSC_markers)$RNA
+
+# Cluster genes
+gene_dist <- dist(avg_exp)
+gene_clust <- hclust(gene_dist)
+
+gene_order <- gene_clust$labels[gene_clust$order]
+
+# Convert dendrogram for plotting
+dend_data <- ggdendro::dendro_data(gene_clust)
+
+dend_plot <- ggdendrogram(gene_clust, rotate = FALSE) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# DotPlot with clustered genes
+dot <- DotPlot(Tert,features = gene_order,assay = "RNA")+
+               theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# Combine the dotplot and the dendogram 
+dend_plot / dot
+
+
+##Figure 2E
 #Heatmap for the top 10 enriched genes per each cluster
 Idents(object = Tert) <- "RNA_snn_res.0.15"
 Tert.markers <- FindAllMarkers(Tert,only.pos = TRUE, min.pct = 0.25, logfc.threshold = 0.25)
@@ -22,7 +108,7 @@ DoHeatmap(Tert, features = top10$gene)
 #Number of cells in each cluster
 table(Tert@meta.data$RNA_snn_res.0.15)
 
-##Figure 2D
+##Figure 2F
 #Overlap of genesfor clusters and cell lines (Jaccard index)
 #Load the following objects 
  Tert_markers <- read.delim("Tert.markers.txt", h=T) 
@@ -138,7 +224,7 @@ length(unique(df$CB4.Symbol.sq.))
 length(unique(df$CD8.Symbol.sq.))
 length(unique(df$Msc.Symbol.sq.))
 
-## Figure 2E
+## Figure 2G
 #Load the following objects 
 Counts_PI3K_AKT_mTOR <- read.delim("Counts_PI3K_AKT_mTOR.txt", h=T) 
 Counts_Glutathione metabolism <- read.delim("Counts_Glutathione metabolism.txt", h=T)
@@ -694,7 +780,7 @@ ggplot(Freq_data_all, aes(x = G protien signalingctor(Cluster),
     panel.grid.major = element_line(color = "grey90")
   )
 
-##Figure 2F
+##Figure 2H
 #Dotplot of marker genes per each cell line
 PI3K_AKT_mTOR <- PI3K_AKT_mTOR[order(-PI3K_AKT_mTOR$Count),]
 PI3K_AKT_mTOR_common<-PI3K_AKT_mTOR[c(1:2),]
@@ -954,5 +1040,131 @@ ggplot(dot_CD8, aes(
     y = "Cluster"
   )
 
-# Final aesthetics were done in Illustrator
+##Figure 2I
+#UMAPplot for each individual clone
+# Select AD10 cells
+Idents(Tert) <- "Dataset"
+AD10 <- subset(Tert, idents = "AD10")
+DefaultAssay(AD10) <- "RNA"
+AD10 <- NormalizeData(AD10, verbose = FALSE)
+AD10 <- FindVariableFeatures(AD10)
+AD10 <- ScaleData(AD10, features = VariableFeatures(AD10),verbose = FALSE)
+AD10 <- RunPCA(AD10,features = VariableFeatures(AD10),verbose = FALSE)
+ElbowPlot(AD10, ndims = 50)
+
+AD10 <- RunUMAP(AD10, dims = 1:20,
+                n.neighbors = 5,
+				min.dist=0.001)
+AD10 <- FindNeighbors(AD10, reduction = "umap", dim=1:2)
+AD10 <- FindClusters(AD10, resolution = 0.015)
+DimPlot(AD10,reduction = "umap",label = TRUE,pt.size=.1)
+
+##DD8
+DD8 <- subset(Tert, idents = "DD8")
+DefaultAssay(DD8) <- "RNA"
+DD8 <- NormalizeData(DD8, verbose = FALSE)
+DD8 <- FindVariableFeatures(DD8)
+DD8 <- ScaleData(DD8, features = VariableFeatures(DD8),verbose = FALSE)
+DD8 <- RunPCA(DD8,features = VariableFeatures(DD8),verbose = FALSE)
+ElbowPlot(DD8, ndims = 50)
+
+DD8 <- RunUMAP(DD8, dims = 1:20,
+                n.neighbors = 5,
+				min.dist=0.001)
+DD8 <- FindNeighbors(DD8, reduction = "umap", dim=1:2)
+DD8 <- FindClusters(DD8, resolution = 0.03)
+DimPlot(DD8,reduction = "umap",label = TRUE,pt.size=.1)
+
+
+##CB4
+CB <- subset(Tert, idents = "CB")
+DefaultAssay(CB) <- "RNA"
+CB <- NormalizeData(CB, verbose = FALSE)
+CB <- FindVariableFeatures(CB)
+CB <- ScaleData(CB, features = VariableFeatures(CB),verbose = FALSE)
+CB <- RunPCA(CB,features = VariableFeatures(CB),verbose = FALSE)
+ElbowPlot(CB, ndims = 50)
+CB <- RunUMAP(CB, dims = 1:20,
+                n.neighbors = 5,
+				min.dist=0.001)
+CB <- FindNeighbors(CB, reduction = "umap", dim=1:2)
+CB <- FindClusters(CB, resolution = 0.025)
+DimPlot(CB,reduction = "umap",label = TRUE,pt.size=.1)
+
+##CD8
+CD <- subset(Tert, idents = "CD")
+DefaultAssay(CD) <- "RNA"
+CD <- NormalizeData(CD, verbose = FALSE)
+CD <- FindVariableFeatures(CD)
+CD <- ScaleData(CD, features = VariableFeatures(CD),verbose = FALSE)
+CD <- RunPCA(CD,features = VariableFeatures(CD),verbose = FALSE)
+ElbowPlot(CD, ndims = 50)
+CD <- RunUMAP(CD, dims = 1:20,
+                n.neighbors = 5,
+				min.dist=0.001)
+CD <- FindNeighbors(CD, reduction = "umap", dim=1:2)
+CD <- FindClusters(CD, resolution = 0.1)
+CD@meta.data$RNA_snn_res.0.1[CD@meta.data$RNA_snn_res.0.1 %in% c(0, 3)] <- 0
+Idents(CD) <- CD@meta.data$RNA_snn_res.0.1
+DimPlot(CD,reduction = "umap",label = TRUE,pt.size=.1)
+
+##Figure 2J
+#Check the overlap of significant marker genes between clusters across different clones
+Tert_markers <- read.delim("Tert.markers.txt", h=T) 
+AD10_markers <- read.delim("AD10_markers.txt", h=T) 
+AD10_markers$cluster <- paste0("AD10_", AD10_markers$cluster)
+DD8_markers <- read.delim("DD8_markers.txt", h=T) 
+DD8_markers$cluster <- paste0("DD8_", DD8_markers$cluster)
+CB4_markers <- read.delim("CB4_markers.txt", h=T) 
+CB4_markers$cluster <- paste0("CB4_", CB4_markers$cluster)
+CD8_markers <- read.delim("CD8_markers.txt", h=T) 
+CD8_markers$cluster <- paste0("CD8_", CD8_markers$cluster)
+
+
+Tert_clusters <- split(
+  Tert_markers$gene[Tert_markers$p_val_adj < 0.05],
+  Tert_markers$cluster[Tert_markers$p_val_adj < 0.05]
+)
+
+AD10_clusters <- split( AD10_markers$gene[AD10_markers$p_val_adj < 0.05],
+                        AD10_markers$cluster[AD10_markers$p_val_adj < 0.05])
+
+DD8_clusters <- split(DD8_markers$gene[DD8_markers$p_val_adj < 0.05],
+                      DD8_markers$cluster[DD8_markers$p_val_adj < 0.05])
+
+CB4_clusters <- split(CB4_markers$gene[CB4_markers$p_val_adj < 0.05],
+                      CB4_markers$cluster[CB4_markers$p_val_adj < 0.05])
+
+CD8_clusters <- split(CD8_markers$gene[CD8_markers$p_val_adj < 0.05],
+                      CD8_markers$cluster[CD8_markers$p_val_adj < 0.05])
+
+
+all_other <- c(AD10_clusters, DD8_clusters, CB4_clusters, CD8_clusters)
+
+tert_names <- names(Tert_clusters)
+other_names <- names(all_other)
+
+jaccard <- function(a, b) {
+  length(intersect(a, b)) / length(union(a, b))
+}
+
+jaccard_mat <- matrix(0,
+                      nrow = length(tert_names),
+                      ncol = length(other_names),
+                      dimnames = list(tert_names, other_names))
+
+for (i in seq_along(tert_names)) {
+  for (j in seq_along(other_names)) {
+    jaccard_mat[i, j] <- jaccard(
+      Tert_clusters[[i]],
+      all_other[[j]]
+    )
+  }
+}
+
+col <- colorRampPalette(c("white","red","black"))(50)
+col_breaks <- seq(0, 1, length.out = 51)
+
+heatmap.2(t(jaccard_mat),scale = "none",col = col,breaks = col_breaks,race = "none",dendrogram = "none",Colv = FALSE,Rowv = FALSE,margins = c(10, 10), cexRow = 0.9,cexCol = 1,xlab = "Tert clusters",ylab = "Cell line clusters")
+
 # Final aesthetics were done in Illustrator
