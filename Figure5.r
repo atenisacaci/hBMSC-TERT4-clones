@@ -704,5 +704,43 @@ ggplot(df, aes(mscumapdim50_1, mscumapdim50_2, color = Atenisa1)) +
   theme_classic()
   
 rm(df,p,col_man)
+
+##Figure 5L
+#Implant inhibitors
+
+data <- read.delim("Implant_Inhibitor.txt",h=T)
+data$Position <- factor(data$Position, levels=c('LF','RF','LR','RR'))
+data$Treatment <- factor(data$Treatment, levels= c('DMSO','Celstrol','TDI_5uM'))
+data$Clones <- factor(data$Clones, levels=c('DD8','CB4'))
+
+data$Cl_Treat <- paste(data$Clones,data$Treatment,sep="_")
+data$Cl_Treat <- factor(data$Cl_Treat, levels=c('DD8_DMSO','DD8_Celstrol','DD8_TDI_5uM','DD8_TDI_1uM','CB4_DMSO','CB4_Celstrol','CB4_TDI_5uM','CB4_TDI_1uM'))
+
+data_mean <- c()
+data_sd <- c()
+
+for (i in levels(data$Cl_Treat)){
+  tmp <- data[data$Cl_Treat ==i,]
+  data_mean <- c(data_mean,mean(tmp$BonePerTissue))
+  data_sd <- c(data_sd,sd(tmp$BonePerTissue))
+}
+
+
+bp <- barplot(data_mean,  ylim=c(0,max(data$BonePerTissue+0.05)), names.arg = levels(data$Cl_Treat))
+points(bp[as.numeric(data$Cl_Treat)],data$BonePerTissue,at=bp, pch=as.numeric(data$Position))
+arrows(bp,data_mean,bp,(data_mean+data_sd),lwd=1.5, angle=90, length=0.05, code=2)
+
+t.test(data[data$Cl_Treat=="DD8_DMSO","BonePerTissue"],data[data$Cl_Treat=="DD8_Celstrol","BonePerTissue"])
+t.test(data[data$Cl_Treat=="DD8_DMSO","BonePerTissue"],data[data$Cl_Treat=="DD8_TDI_5uM","BonePerTissue"])
+
+t.test(data[data$Cl_Treat=="CB4_DMSO","BonePerTissue"],data[data$Cl_Treat=="CB4_Celstrol","BonePerTissue"])
+t.test(data[data$Cl_Treat=="CB4_DMSO","BonePerTissue"],data[data$Cl_Treat=="CB4_TDI_5uM","BonePerTissue"])
+
+plot(1:8,data_mean, xlab="", ylab="", xaxt="none")
+#axis(1,at=c(1:5),labels = c('D100','D75C25','D50C50','D25C75','C100'),las=2)
+lines(c(1:8,1:8),c(data_mean - data_sd,data_mean + data_sd), lty=2)
+lines(1:8,data_mean - data_sd, lty=2)
+abline(1.25,-0.25, lty=3)
+
 # Final aesthetics were done in Illustrator
 
