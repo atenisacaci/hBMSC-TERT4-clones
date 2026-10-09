@@ -1,746 +1,442 @@
-##Figure 5
-#Figure 5A
+###Figure 5
+##Figure 5A
+Tert <- readRDS("Tert_Subtypes.rds")
+Idents(Tert) <- "Dataset" ##the cell lines
+# Convert Seurat object to CellChat input
+# normalized data
+data.input <- GetAssayData(Tert, assay = "RNA", slot = "data")
+meta <- data.frame(labels = Idents(Tert), row.names = names(Idents(Tert)))
+
+##Create CellChat object
+cellchat <- createCellChat(object = data.input, meta = meta, group.by = "labels")
+
+#Set CellChat database for humans
+CellChatDB <- CellChatDB.human  
+cellchat@DB <- CellChatDB
+
+##get all the ligands and receptors from the CellChat 
+CellChatDB.human$interaction
+
+db_full <- CellChatDB.human$interaction
+
+head(db_full[, c("interaction_name", "pathway_name", "ligand", "receptor")])
+
+##extract signaling genes from CellChat 
+extract_cellchatDB_genes <- function(db) {
+  
+  cols <- c("ligand", "receptor", "agonist", "antagonist",
+            "co_A_receptor", "co_I_receptor")
+  
+  genes <- unlist(db[, cols], use.names = FALSE)
+  genes <- genes[!is.na(genes)]
+  genes <- genes[genes != ""]
+  
+  # split complexes like ITGA9_ITGB1
+  genes <- unlist(strsplit(genes, "_"))
+  
+  genes <- trimws(genes)
+  genes <- unique(genes)
+  genes <- sort(genes)
+  
+  return(genes)
+}
+
+cellchatDB_genes <- extract_cellchatDB_genes(CellChatDB.human$interaction)
+
+length(cellchatDB_genes)
+head(cellchatDB_genes, 100)
+
+Tert<-subset(Tert, idents = c("AD10","DD8","CB","CD"))
+HIPPO_genes <- c("NTRK2","TEAD1","PLCB1","PDGFRB","GNAS","TCF7L2","TCF7L1","PRKAR1A","PRKCE","IGF1R","GNAI2","PRKCH","SMAD3","CDH6","EGFR","SMAD2","GNAQ","SAV1","MAPK10","MAP4K3","CTNNA1","YWHAQ")
+Parkin_genes <-c("TUBA1A","PSMD8","PSMC5","PSMC3","HSPA8","TUBB","TUBB2B","TUBB2A","PSMC4","UBE2L6","TUBB4B","PSMD13","PSMD4","PSMC2","PSMD2","PSMD6","PSMD3","UBE2L3","HSPA5","PSMD1","TUBB6","PSMD14")
+Ca_genes <-c("GNG12","GNAI2","ADCY9","YWHAB","GNG11","PRKCH","CALM1","GNAS","CAMK2D","RGS20","ADCY4","PRKAR1A","CACNA1C","ITPR1","YWHAQ","GNAQ","YWHAE","PRKD1")
+TGF_genes <-c("STAT1","SMAD6","SMAD9","ZEB2","FBN1","INHBA","ENG","HRAS","SMAD3")
+Gprotein_genes <-c("RRAS","GNG12","GNAI2","ADCY9","AKAP12","GNG11","PRKCH","CALM1","GNAS","PDE7B","ADCY4","PRKAR1A","PDE4A","ITPR1","HRAS","GNAQ","PRKD1","PDE1C")
+
+##compare the overlap with our signature 
+signatures <- list(
+  HIPPO = HIPPO_genes,
+  Parkin = Parkin_genes,
+  Ca = Ca_genes,
+  TGF = TGF_genes,
+  Gprotein = Gprotein_genes
+)
+
+
+#extract all ligands and receptors from the full CellChat database
+extract_cellchat_lr <- function(db) {
+
+  ligands <- db$ligand
+  receptors <- db$receptor
+
+  ligands <- ligands[!is.na(ligands) & ligands != ""]
+  receptors <- receptors[!is.na(receptors) & receptors != ""]
+
+  # split complexes like ITGA9_ITGB1
+  ligands <- unique(trimws(unlist(strsplit(ligands, "_"))))
+  receptors <- unique(trimws(unlist(strsplit(receptors, "_"))))
+
+  list(
+    ligands = sort(ligands),
+    receptors = sort(receptors)
+  )
+}
+db <- CellChatDB.human$interaction
+lr <- extract_cellchat_lr(db)
+
+cellchat_ligands <- lr$ligands
+cellchat_receptors <- lr$receptors
+db <- CellChatDB.human$interaction
+lr <- extract_cellchat_lr(db)
+
+cellchat_ligands <- lr$ligands
+cellchat_receptors <- lr$receptors
+signatures <- list(
+  HIPPO = HIPPO_genes,
+  Parkin = Parkin_genes,
+  Ca = Ca_genes,
+  TGF = TGF_genes,
+  Gprotein = Gprotein_genes
+)
+lr_overlap <- do.call(rbind, lapply(names(signatures), function(sig) {
+
+  sig_genes <- unique(signatures[[sig]])
+
+  ligand_overlap <- intersect(sig_genes, cellchat_ligands)
+  receptor_overlap <- intersect(sig_genes, cellchat_receptors)
+
+  data.frame(
+    Signature = sig,
+    Signature_Size = length(sig_genes),
+
+    Ligand_N = length(ligand_overlap),
+    Ligand_Genes = paste(ligand_overlap, collapse = ", "),
+
+    Receptor_N = length(receptor_overlap),
+    Receptor_Genes = paste(receptor_overlap, collapse = ", "),
+
+    Total_LR_N = length(unique(c(ligand_overlap, receptor_overlap))),
+    Total_LR_Genes = paste(unique(c(ligand_overlap, receptor_overlap)), collapse = ", ")
+  )
+}))
+lr_overlap[order(-lr_overlap$Total_LR_N), ]
+
+plot_df <- data.frame(
+  Signature = lr_overlap$Signature,
+
+  Ligands = lr_overlap$Ligand_N,
+
+  Receptors = lr_overlap$Receptor_N,
+
+  Other = lr_overlap$Signature_Size -
+           lr_overlap$Total_LR_N
+)
+
+
+plot_long <- pivot_longer(
+  plot_df,
+  cols = c(Ligands, Receptors, Other),
+  names_to = "Category",
+  values_to = "Count"
+)
+
+##plot ligand/recptor composition of pathway signature
+ggplot(plot_long,
+       aes(x = Signature,
+           y = Count,
+           fill = Category)) +
+
+  geom_bar(stat = "identity") +
+
+  theme_classic(base_size = 14) +
+
+  scale_fill_manual(
+    values = c(
+      Ligands = "tomato",
+      Receptors = "steelblue",
+      Other = "grey80"
+    )
+  ) +
+
+  labs(
+    title = "Ligand/Receptor composition of pathway signatures",
+    y = "Number of genes",
+    x = ""
+  )
+
+##Figure 5B
+Idents(Tert) <- "Dataset"
+Tert<-subset(Tert, idents = c("AD10","DD8","CB","CD"))
+HIPPO_genes <- c("NTRK2","TEAD1","PLCB1","PDGFRB","GNAS","TCF7L2","TCF7L1","PRKAR1A","PRKCE","IGF1R","GNAI2","PRKCH","SMAD3","CDH6","EGFR","SMAD2","GNAQ","SAV1","MAPK10","MAP4K3","CTNNA1","YWHAQ")
+Parkin_genes <-c("TUBA1A","PSMD8","PSMC5","PSMC3","HSPA8","TUBB","TUBB2B","TUBB2A","PSMC4","UBE2L6","TUBB4B","PSMD13","PSMD4","PSMC2","PSMD2","PSMD6","PSMD3","UBE2L3","HSPA5","PSMD1","TUBB6","PSMD14")
+Ca_genes <-c("GNG12","GNAI2","ADCY9","YWHAB","GNG11","PRKCH","CALM1","GNAS","CAMK2D","RGS20","ADCY4","PRKAR1A","CACNA1C","ITPR1","YWHAQ","GNAQ","YWHAE","PRKD1")
+TGF_genes <-c("STAT1","SMAD6","SMAD9","ZEB2","FBN1","INHBA","ENG","HRAS","SMAD3")
+Gprotein_genes <-c("RRAS","GNG12","GNAI2","ADCY9","AKAP12","GNG11","PRKCH","CALM1","GNAS","PDE7B","ADCY4","PRKAR1A","PDE4A","ITPR1","HRAS","GNAQ","PRKD1","PDE1C")
+
+pathways <- list(
+  HIPPO = HIPPO_genes,
+  Parkin=Parkin_genes,
+  Ca = Ca_genes,
+  TGF = TGF_genes,
+  Gprotein = Gprotein_genes
+)
+for (p in names(pathways)) {
+  Tert <- AddModuleScore(
+    Tert,
+    features = list(pathways[[p]]),
+    name = p
+  )
+}
+
+
+##ROC curve 
+roc_df <- Tert@meta.data[, c(
+  "Dataset",
+  "HIPPO1",
+  "Parkin1",
+  "Ca1",
+  "TGF1",
+  "Gprotein1"
+)]
+
+roc_df$Group <- ifelse(roc_df$Dataset %in% c("AD10", "DD8"), 1, 0)
+roc_df$Group <- as.factor(roc_df$Group)
+head(roc_df)
+table(roc_df$Dataset, roc_df$Group)
+
+library(pROC)
+
+roc_hippo <- roc(roc_df$Group, roc_df$HIPPO1)
+
+plot(roc_hippo, print.auc = TRUE, main = "ROC - HIPPO")
+
+
+pathway_cols <- c("HIPPO1", "Parkin1", "Ca1", "TGF1", "Gprotein1")
+
+roc_list <- lapply(pathway_cols, function(p) {
+  roc_obj <- roc(roc_df$Group, roc_df[[p]])
+  data.frame(
+    Pathway = p,
+    AUC = as.numeric(auc(roc_obj))
+  )
+})
+
+roc_results <- do.call(rbind, roc_list)
+roc_results <- roc_results[order(-roc_results$AUC), ]
+roc_results
+
+roc_colors <- c("red","blue","darkgreen","purple","orange","brown","black")
+
+plot(roc(roc_df$Group, roc_df[[pathway_cols[1]]]),
+     col = roc_colors[1],
+     lwd = 2,
+     main = "ROC Curves for Pathway Scores")
+
+for (i in 2:length(pathway_cols)) {
+  plot(roc(roc_df$Group, roc_df[[pathway_cols[i]]]),
+       col = roc_colors[i],
+       lwd = 2,
+       add = TRUE)
+}
+
+legend("bottomright",
+       legend = paste0(roc_results$Pathway, " (AUC=", round(roc_results$AUC, 2), ")"),
+       col = roc_colors[match(roc_results$Pathway, pathway_cols)],
+       lwd = 2,
+       cex = 0.8)
+
+
+roc_results$Pathway <- factor(roc_results$Pathway, levels = roc_results$Pathway)
+
+ggplot(roc_results, aes(x = Pathway, y = AUC, fill = Pathway)) +
+  geom_bar(stat = "identity", width = 0.7) +
+  theme_classic() +
+  ylim(0, 1) +
+  labs(
+    title = "Pathway classification performance",
+    y = "AUC",
+    x = NULL
+  ) +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    legend.position = "none"
+  )
+##Figure 5C
+#load the following object
+library(R.utils)
+GSE253355 <- readRDS("GSE253355_MSC_Subset_Seurat.rds")
+Idents(object = GSE253355) <- "original_seurat_clusters"
+Clusters  <- sort(levels(GSE253355$original_seurat_clusters))
+Result <- list()
+
+# Defining enriched genes, e.g. one cluster versus all other data points
+GSE253355_markers <- FindAllMarkers(GSE253355, only.pos = TRUE, min.pct = 0.1, logfc.threshold = 0.1)
+GSE253355_markers <- GSE253355_markers[GSE253355_markers$p_val_adj < 0.05,]
+
+# Defining marker genes, e.g. one cluster versus all other clusters individually and clean up results in a list
+cluster_name <- Clusters
+for(clust in Clusters){
+	Pairs <- data.frame(GroupA = clust, GroupB = Clusters[!(Clusters %in% clust)])
+	Exclusive <- c()
+	for (i in 1:nrow(Pairs)){
+		tmp <- FindMarkers(GSE253355, ident.1 = clust, ident.2 = Pairs[i,2], min.pct = 0.1, only.pos = TRUE)
+		tmp <- tmp[tmp$p_val_adj < 0.05,]
+		Exclusive <- c(Exclusive,as.character(rownames(tmp)))
+		print(paste("Cluster",clust,"out of",length(Clusters),"versus Cluster",Pairs[i,2],sep=" "))
+	}
+	tmp <- data.frame(table(Exclusive))
+	tmp1 <- tmp[tmp$Freq==length(Clusters)-1,]
+	tmp2 <- tmp[tmp$Freq > 0,]
+	if(length(Exclusive) >= 0 & nrow(tmp1)>0 & length(GSE253355_markers[GSE253355_markers$cluster == clust,'gene'])>0){
+			Result[[clust]] <- rbind(
+			data.frame("Gene"= GSE253355_markers[GSE253355_markers$cluster == clust,'gene'],"Marker"="Enriched"),
+			data.frame("Gene"= tmp1[,'Exclusive'],"Marker"="Exclusive"),
+			data.frame("Gene"= tmp2[,'Exclusive'],"Marker"="Significant"))
+	} else if(length(Exclusive) > 0 & length(GSE253355_markers[GSE253355_markers$cluster == clust,'gene'])>0){
+			Result[[clust]] <- rbind(
+			data.frame("Gene"= GSE253355_markers[GSE253355_markers$cluster == clust,'gene'],"Marker"="Enriched"),
+			data.frame("Gene"= tmp2[,'Exclusive'],"Marker"="Significant"))
+	} else if(length(GSE253355_markers[GSE253355_markers$cluster == clust,'gene'])>=0){
+			Result[[clust]] <- rbind(
+			data.frame("Gene"= GSE253355_markers[GSE253355_markers$cluster == clust,'gene'],"Marker"="Enriched"))
+	} else if(length(Exclusive) > 0){
+			Result[[clust]] <- rbind(
+			data.frame("Gene"= tmp2[,'Exclusive'],"Marker"="Significant"))
+	} else {
+			cluster_name <- cluster_name[!cluster_name %in% clust]
+	}
+
+}
+names(Result) <- paste("Cl_",cluster_name,sep="")
+Cluster_markers <- bind_rows(Result, .id = "column_label")
+# Stats on enriched and exclusive Markers
+mat <- matrix(NA,ncol=3,nrow=length(Clusters))
+rownames(mat) <- Clusters
+colnames(mat) <- c('Exclusive','Enriched','Significant')
+for (i in 1:length(Clusters)){
+	tmp <- Result[[i]]
+	mat[i,1] <- nrow(tmp[tmp$Marker =="Exclusive",])
+	mat[i,2] <- nrow(tmp[tmp$Marker =="Enriched",])
+	mat[i,3] <- nrow(tmp[tmp$Marker =="Significant",])
+}
+mat
+
+###load the following object
+Clones <- read.delim("Cluster_markers_GSE253355.txt",h=T)
+All_genes_clones <- readRDS("All_genes_clones.rds")
+
+# Combine markers of single RNA-seq in one data frame and split enriched markers in a list
+markers<-Clones
+All_genes_clones <- All_genes_clones[All_genes_clones %in% Clones$Gene]
+Clones <- Clones[Clones$Gene %in% All_genes_clones,]
+markers <- markers[markers$Gene %in% All_genes_clones,]
+
+Gene_groups <- list()
+Gene_groups[[1]] <- markers[markers$column_label== "Cl_Adipo-MSC" & markers$Marker =="Exclusive",'Gene' ]
+Gene_groups[[2]] <- markers[markers$column_label== "Cl_Fibro-MSC" & markers$Marker =="Exclusive",'Gene' ]
+Gene_groups[[3]] <- markers[markers$column_label== "Cl_Osteo-MSC" & markers$Marker =="Exclusive",'Gene' ]
+Gene_groups[[4]] <- markers[markers$column_label== "Cl_Osteoblast" & markers$Marker =="Exclusive",'Gene' ]
+Gene_groups[[5]] <- markers[markers$column_label== "Cl_OsteoFibro-MSC" & markers$Marker =="Exclusive",'Gene' ]
+Gene_groups[[6]] <- markers[markers$column_label== "Cl_THY1+ MSC" & markers$Marker =="Exclusive",'Gene' ]
+
+
+names(Gene_groups) <- c('Cl_Adipo-MSC','Cl_Fibro-MSC','Cl_Osteo-MSC','Cl_Osteoblast','Cl_OsteoFibro-MSC','Cl_THY1+ MSC')
+
+HIPPO_genes <- c("NTRK2","TEAD1","PLCB1","PDGFRB","GNAS","TCF7L2","TCF7L1","PRKAR1A","PRKCE","IGF1R","GNAI2","PRKCH","SMAD3","CDH6","EGFR","SMAD2","GNAQ","SAV1","MAPK10","MAP4K3","CTNNA1","YWHAQ")
+Parkin_genes <-c("TUBA1A","PSMD8","PSMC5","PSMC3","HSPA8","TUBB","TUBB2B","TUBB2A","PSMC4","UBE2L6","TUBB4B","PSMD13","PSMD4","PSMC2","PSMD2","PSMD6","PSMD3","UBE2L3","HSPA5","PSMD1","TUBB6","PSMD14")
+Ca_genes <-c("GNG12","GNAI2","ADCY9","YWHAB","GNG11","PRKCH","CALM1","GNAS","CAMK2D","RGS20","ADCY4","PRKAR1A","CACNA1C","ITPR1","YWHAQ","GNAQ","YWHAE","PRKD1")
+TGF_genes <-c("STAT1","SMAD6","SMAD9","ZEB2","FBN1","INHBA","ENG","HRAS","SMAD3")
+Gprotein_genes <-c("RRAS","GNG12","GNAI2","ADCY9","AKAP12","GNG11","PRKCH","CALM1","GNAS","PDE7B","ADCY4","PRKAR1A","PDE4A","ITPR1","HRAS","GNAQ","PRKD1","PDE1C")
+
+Gene_signatures <- list(
+  HIPPO = HIPPO_genes,
+  Parkin = Parkin_genes,
+  Calcium = Ca_genes,
+  TGF = TGF_genes,
+  Gprotein = Gprotein_genes
+)
+
+Gene_signatures <- lapply(
+  Gene_signatures,
+  function(x) unique(x[x %in% All_genes_clones])
+)
+# Test the overlap of both gene groups using a hypergeometric test
+mat <- matrix(NA, ncol=length(Gene_signatures),nrow=length(Gene_groups))
+colnames(mat) <- names(Gene_signatures)
+rownames(mat) <- names(Gene_groups)
+
+for (i in 1:length(Gene_groups)){
+  for (k in 1:length(Gene_signatures)){
+    tmp_i <- Gene_groups[[i]]
+    tmp_k <- Gene_signatures[[k]]
+    x <- length(tmp_k[tmp_k %in% tmp_i])
+    m <- length(tmp_k)
+    n <- length(All_genes_clones[!All_genes_clones %in% tmp_k])
+    y <- length(tmp_i)
+    mat[i,k] <- phyper(x,m,n,y,lower.tail = F)
+  }
+}
+# transform to log scale
+mat <- -log10(mat)
+mat[mat=="Inf"]<-187
+# Show enrichment in a heatmap
+mat_col <- c('white',designer.colors(n=50, col=c('plum1','darkmagenta')))
+mat_col_breaks <- c(0,seq(-log10(0.05),max(6),length=51))
+heatmap.2(mat,Rowv= F,dendrogram = 'none',  Colv=F, scale='none', col=mat_col,breaks=mat_col_breaks, trace='none')
+
+##Figure 5D
+#Load the following object
+genes_df <- read.csv("ebmd_con_indepen.csv")
+target_genes<- unique(genes_df$C.GENE)
+HIPPO_genes <- c("NTRK2","TEAD1","PLCB1","PDGFRB","GNAS","TCF7L2","TCF7L1","PRKAR1A","PRKCE","IGF1R","GNAI2","PRKCH","SMAD3","CDH6","EGFR","SMAD2","GNAQ","SAV1","MAPK10","MAP4K3","CTNNA1","YWHAQ")
+Parkin_genes <-c("TUBA1A","PSMD8","PSMC5","PSMC3","HSPA8","TUBB","TUBB2B","TUBB2A","PSMC4","UBE2L6","TUBB4B","PSMD13","PSMD4","PSMC2","PSMD2","PSMD6","PSMD3","UBE2L3","HSPA5","PSMD1","TUBB6","PSMD14")
+Ca_genes <-c("GNG12","GNAI2","ADCY9","YWHAB","GNG11","PRKCH","CALM1","GNAS","CAMK2D","RGS20","ADCY4","PRKAR1A","CACNA1C","ITPR1","YWHAQ","GNAQ","YWHAE","PRKD1")
+TGF_genes <-c("STAT1","SMAD6","SMAD9","ZEB2","FBN1","INHBA","ENG","HRAS","SMAD3")
+Gprotein_genes <-c("RRAS","GNG12","GNAI2","ADCY9","AKAP12","GNG11","PRKCH","CALM1","GNAS","PDE7B","ADCY4","PRKAR1A","PDE4A","ITPR1","HRAS","GNAQ","PRKD1","PDE1C")
+signatures <- list(
+  HIPPO = HIPPO_genes,
+  Parkin = Parkin_genes,
+  Ca = Ca_genes,
+  TGF = TGF_genes,
+  Gprotein = Gprotein_genes
+)
+overlap_df <- do.call(rbind, lapply(names(signatures), function(sig){
+  
+  sig_genes <- unique(signatures[[sig]])
+  
+  overlap <- intersect(sig_genes, target_genes)
+  
+  data.frame(
+    Signature = sig,
+    Signature_Size = length(sig_genes),
+    Overlap_N = length(overlap),
+    Overlap_Fraction = length(overlap) / length(sig_genes),
+    Overlap_Genes = paste(overlap, collapse = ", "),
+    pvalue = phyper(length(overlap),length(sig_genes),length(Atenisa_all)-length(sig_genes), length(target_genes), lower.tail = F)
+  )
+}))
+
+#plot putative casual eBMD genes overlap with rwiki signaling pathways 
+ggplot(overlap_df, aes(x = Signature, y = Overlap_N, fill = Overlap_N)) + 
+  geom_bar(stat = "identity", color = "black", width = 0.7, linewidth = 0.3) +
+  geom_text(aes(label = Overlap_N), vjust = -0.5, size = 5) + 
+  scale_fill_gradientn(colours = c("white", "white", designer.colors(n = 50, col = c("plum1","darkmagenta"))), 
+                       values = scales::rescale(c(0, 2, seq(2, 8, length.out = 50)), from = c(0, 8)), limits = c(0, 8), 
+                       breaks = 0:8, oob = scales::squish, name = "Overlap\ncount") + 
+  expand_limits(y = max(overlap_df$Overlap_N) + 2) + theme_classic(base_size = 14) + 
+  theme(axis.text.x = element_text(size = 12, face = "bold"),
+        axis.text.y = element_text(size = 12), axis.title.y = element_text(size = 14, face = "bold"), 
+        plot.title = element_text(size = 16, face = "bold", hjust = 0.5), 
+        legend.title = element_text(size = 12, face = "bold"), 
+        legend.text = element_text(size = 11)) + 
+  labs(title = "Gene overlap with signaling signatures", y = "Number of overlapping genes", x = NULL)
+
+
+##Figure 5E
 #Load the following objects from https://osf.io/wxpgn/
 ##Dotplot expession of Hippo compentency genes 
 Tert <- readRDS("Tert_Subtypes.rds")
 Idents(Tert) <- "Dataset"
 DotPlot(Tert, features = c("NTRK2","TEAD1","PLCB1","PDGFRB","GNAS","TCF7L2","TCF7L1","PRKAR1A","PRKCE","IGF1R","GNAI2","PRKCH","SMAD3","CDH6","EGFR","SMAD2","GNAQ","SAV1","MAPK10","MAP4K3","CTNNA1","YWHAQ")) + RotatedAxis()
 
-#Figure 5B
-#SPEED analysis
-Tert.markers <- read.delim("Tert.markers.txt", h=T)
-
-### Signaling Pathway enrichment
-Pathways <- read_tsv("speed2_signatures.tsv")
-Pathways <- Pathways[grepl("UP", Pathways$regulation),]
-
-
-PathwayEnrich <- data.frame(matrix(NA, ncol=length(Gene_groups)*2, nrow=length(unique(Pathways$Pathway))))
-rownames(PathwayEnrich) <- unique(Pathways$Pathway)
-colnames(PathwayEnrich) <- c(paste("Pval",names(Gene_groups),sep="_"), paste("Enrich",names(Gene_groups),sep="_"))
-
-for( k in 1:length(Gene_groups)){
-  tmp <- Gene_groups[[k]]
-  tmp_length <- length(tmp)
-  tmp_length_not <- length(unique(Tert.markers[!Tert.markers$gene %in% tmp, 'Symbol']))
-  for (i in 1:length(unique(Pathways$Pathway))){
-    tmp_Symbol <- Pathways[Pathways$Pathway == unique(Pathways$Pathway)[i] & Pathways$qval < 0.01,]
-    tmp_Symbol <- tmp_Symbol[tmp_Symbol$SYMBOL %in% Tert.markers$gene,]
-    tmp_Symbol_length <- length(tmp_Symbol$SYMBOL)
-    tmp_tmp <- nrow(tmp_Symbol[tmp_Symbol$SYMBOL %in% tmp,])
-    if(tmp_tmp>0){
-      PathwayEnrich[i,k] <- phyper(tmp_tmp,tmp_length, tmp_length_not,tmp_Symbol_length,lower.tail=FALSE)
-      PathwayEnrich[i,k+length(Gene_groups)] <- log2((tmp_tmp/tmp_Symbol_length)/(tmp_length/length(Tert.markers$gene)))
-    } else{
-      PathwayEnrich[i,k] <- 1
-      PathwayEnrich[i,k+length(Gene_groups)] <- 0
-    }
-  }
-}
-for (k in 1:length(Gene_groups)){
-  PathwayEnrich[PathwayEnrich[,k] > 0.05,k+length(Gene_groups)] <- 0
-}
-
-p <- -log10(PathwayEnrich[,1:length(Gene_groups)])
-p <- p[!is.infinite(rowSums(p)),] 
-# Plot the pathways of interest
-mat_col <- c('white',designer.colors(n=50, col=c('plum1','darkmagenta')))
-mat_col_breaks <- c(0,seq(-log10(0.01),max(p),length=51))
-
-heatmap.2(as.matrix(p),main="RNASPEED", Rowv = T, Colv=F, dendrogram='none',cexCol = 0.5, scale='none', col=mat_col,breaks=mat_col_breaks, trace='none' )
-
-rm(i,PathwayEnrich, Pathways, col1, tmp, tmp2, tmp_down, tmp_up, down, down_not, up, up_not)
-
-clusters <- sort(unique(Tert.markers$cluster))
-
-Gene_groups <- lapply(clusters, function(cl){
-  unique(Tert.markers$gene[Tert.markers$cluster == cl])
-})
-
-names(Gene_groups) <- clusters
-
-Pathway_list <- unique(Pathways$Pathway)
-
-PathwayEnrich <- data.frame(
-  matrix(NA,
-         ncol = length(Gene_groups)*2,
-         nrow = length(Pathway_list))
-)
-
-rownames(PathwayEnrich) <- Pathway_list
-colnames(PathwayEnrich) <- c(
-  paste("Pval", names(Gene_groups), sep="_"),
-  paste("Enrich", names(Gene_groups), sep="_")
-)
-
-all_genes <- unique(Tert.markers$gene)
-
-for(k in seq_along(Gene_groups)){
-  
-  tmp <- Gene_groups[[k]]
-  tmp <- tmp[!is.na(tmp)]
-  
-  tmp_length <- length(tmp)
-  tmp_length_not <- length(setdiff(all_genes, tmp))
-  
-  for(i in seq_along(Pathway_list)){
-    
-    tmp_Symbol <- Pathways[
-      Pathways$Pathway == Pathway_list[i] &
-        Pathways$qval < 0.01, ]
-    
-    tmp_Symbol <- tmp_Symbol[tmp_Symbol$SYMBOL %in% all_genes, ]
-    
-    tmp_Symbol_length <- length(unique(tmp_Symbol$SYMBOL))
-    
-    tmp_tmp <- length(intersect(tmp, tmp_Symbol$SYMBOL))
-    
-    if(tmp_tmp > 0 && tmp_length > 0 && tmp_Symbol_length > 0){
-      
-      PathwayEnrich[i,k] <- phyper(
-        tmp_tmp,
-        tmp_length,
-        tmp_length_not,
-        tmp_Symbol_length,
-        lower.tail = FALSE
-      )
-      
-      PathwayEnrich[i,k + length(Gene_groups)] <-
-        log2((tmp_tmp/tmp_Symbol_length) /
-               (tmp_length/length(all_genes)))
-      
-    } else {
-      
-      PathwayEnrich[i,k] <- 1
-      PathwayEnrich[i,k + length(Gene_groups)] <- 0
-      
-    }
-    
-  }
-}
-
-
-for(k in seq_along(Gene_groups)){
-  PathwayEnrich[
-    !is.na(PathwayEnrich[,k]) &
-      PathwayEnrich[,k] > 0.05,
-    k + length(Gene_groups)
-  ] <- 0
-}
-
-
-
-max_val <- max(PathwayEnrich[is.finite(as.matrix(PathwayEnrich))], na.rm = TRUE)
-
-# Replace Inf and -Inf
-PathwayEnrich[is.infinite(as.matrix(PathwayEnrich))] <- max_val
-
-p <- -log10(PathwayEnrich[,1:length(Gene_groups)])
-
-p <- as.matrix(p)
-
-max_val <- max(p[is.finite(p)], na.rm = TRUE)
-p[!is.finite(p)] <- max_val
-
-
-p <- p[rowSums(p, na.rm = TRUE) > 0, ]
-
-mat_col <- c('white', designer.colors(n=50, col=c('plum1','darkmagenta')))
-mat_col_breaks <- c(0, seq(-log10(0.01), max(p), length = 51))
-
-heatmap.2(
-  as.matrix(p),
-  main = "SPEED",
-  Rowv = TRUE,
-  Colv = FALSE,
-  dendrogram = 'none',
-  cexCol = 0.6,
-  scale = 'none',
-  col = mat_col,
-  breaks = mat_col_breaks,
-  trace = 'none'
-)
-
-#Figure 5C
-###Figure 5C
-# Cell: Transcriptional targets of Hippo signaling in mammalian cells
-# Goal here Hippo pathway pertubation in 3 cell lines, identify NF2-LATS2 sensitive genes that are reversed by YAP-TAZ knockdown
-library(GEOquery)
-library(limma)
-
-HIPPO_signature <- c("NTRK2","TEAD1","PLCB1","PDGFRB","GNAS","TCF7L2","TCF7L1","PRKAR1A","PRKCE","IGF1R","GNAI2","PRKCH","SMAD3","CDH6","EGFR","SMAD2","GNAQ","SAV1","MAPK10","MAP4K3","CTNNA1","YWHAQ")
-
-HIPPO_target <- c("CCN1", "PEA15", "NPPB","EPHA2", "NUAK2", "FAM107B","ANKRD1", "MYOF", "TSPAN4", "PARVA", "RBM14","CENATAC","GPRC5A","KRT7", "KRT18","HSPB8","CRY1","SAMD4A","SNAPC1","TPM1","DUSP14","LDLR",
-"SYDE1", "NFKBID","CRIM1","KMT5A","RND3","AMOTL2","PIM1","CPA4","CYRIB","MIR622","UGCG","TCEAL9","PIM2","FLNA")
-
-GSE49384_results <- read.delim("GSE49384_results.txt", h=T)
-
-
-# helper function: median + shaded interval
-add_median_band <- function(mat, x, col_line="black", col_fill=rgb(0,0,1,0.2)) {
-  med <- apply(mat, 2, median)
-  sdev <- apply(mat, 2, sd)
-  n <- nrow(mat)
-  se <- sdev / sqrt(n)
-  
-  # approximate 95% CI
-  lower <- med - 1.96 * se
-  upper <- med + 1.96 * se
-  
-  polygon(c(x, rev(x)),
-          c(lower, rev(upper)),
-          col = col_fill, border = NA)
-  
-  lines(x, med, col=col_line, lwd=2)
-}
-
-# Making line plots for the three cell lines for HIPPO_signature
-
-y <- GSE49384_results[GSE49384_results$Symbol_canonical %in% HIPPO_signature,10:27]
-colnames(y) <- paste(GSE49384_pheno$cellline, GSE49384_pheno$group, sep="_")
-
-y <- (y[, seq(1, ncol(y), by = 2)] +
-        y[, seq(2, ncol(y), by = 2)]) / 2
-
-y <- t(scale(t(y)))
-
-plot(0,0,pch="", xlim=c(1,9), ylim=c(-1,1))
-add_median_band(y[,1:3], x=1:3, col_line="black",   col_fill="lightgrey")
-add_median_band(y[,4:6], x=4:6, col_line="black",  col_fill="lightgrey")
-add_median_band(y[,7:9], x=7:9, col_line="black", col_fill="lightgrey")
-
-# Making line plots for the three cell lines for HIPPO_target signature
-
-y <- GSE49384_results[GSE49384_results$Symbol_canonical %in% HIPPO_target,10:27]
-colnames(y) <- paste(GSE49384_pheno$cellline, GSE49384_pheno$group, sep="_")
-
-y <- (y[, seq(1, ncol(y), by = 2)] +
-        y[, seq(2, ncol(y), by = 2)]) / 2
-
-y <- t(scale(t(y)))
-
-plot(0,0,pch="", xlim=c(1,9), ylim=c(-1,1))
-add_median_band(y[,1:3], x=1:3, col_line="black",   col_fill="lightgrey")
-add_median_band(y[,4:6], x=4:6, col_line="black",  col_fill="lightgrey")
-add_median_band(y[,7:9], x=7:9, col_line="black", col_fill="lightgrey")
-
-
-#Figure 5D & 5E
-Tert <- readRDS("Tert_Subtypes.rds")
-Idents(Tert) <- "Dataset"
-#Vlnplot expression of Hippo compentency genes per each cell lines
-genes_of_interest<- c("NTRK2","TEAD1","PLCB1","PDGFRB","GNAS","TCF7L2","TCF7L1","PRKAR1A","PRKCE","IGF1R","GNAI2","PRKCH","SMAD3","CDH6","EGFR","SMAD2","GNAQ","SAV1","MAPK10","MAP4K3","CTNNA1","YWHAQ")
-
-##Calculate the average expression levels of each program (cluster) on single cell level
-Tert <- AddModuleScore(
-  Tert,
-  features = list(genes_of_interest),
-  name = "ProgramScore"
-)
-
-VlnPlot(Tert, features="ProgramScore1", group.by="Dataset", pt.size=0)
-
-#Vlnplot expression of Hippo target genes per each cell lines
-hippo_targets <- c("CCN1", "PEA15", "NPPB","EPHA2", "NUAK2", "FAM107B","ANKRD1", "MYOF", "TSPAN4", "PARVA", "RBM14","CENATAC","GPRC5A","KRT7", "KRT18","HSPB8","CRY1","SAMD4A","SNAPC1","TPM1","DUSP14","LDLR",
-"SYDE1", "NFKBID","CRIM1","KMT5A","RND3","AMOTL2","PIM1","CPA4","CYRIB","MIR622","UGCG","TCEAL9","PIM2","FLNA")
-
-##Calculate the average expression levels of each program (cluster) on single cell level
-Tert <- AddModuleScore(
-  Tert,
-  features = list(hippo_targets),
-  name = "ProgramScore"
-)
-VlnPlot(Tert, features="ProgramScore1", group.by="Dataset", pt.size=0)
-
-#Featureplot of Hippo compentency and target genes
-Tert <- AddModuleScore(
-  Tert,
-  features = list(hippo_targets, genes_of_interest),
-  name = c("HippoScore","SignatureScore")
-)
-
-umap <- Embeddings(Tert, reduction = "umap")
-
-df <- data.frame(
-  UMAP_1 = umap[,1],
-  UMAP_2 = umap[,2],
-  HippoScore1 = Tert$HippoScore1,
-  SignatureScore2 = Tert$SignatureScore2
-)
-col_man <- rev(RColorBrewer::brewer.pal(8, "Spectral"))
-
-
-p1 <- ggplot(df, aes(x = UMAP_1, y = UMAP_2, color = HippoScore1)) +
-  geom_point(size = 0.2) +
-  scale_color_gradientn(
-    colours = colorRampPalette(col_man)(100),
-    limits = quantile(df$HippoScore1, c(0.05, 0.95), na.rm = TRUE),
-    name = "HippoScore"
-  ) +
-  theme_classic()
-
-p1 <- ggplot(df, aes(x = UMAP_1, y = UMAP_2, color = HippoScore1)) +
-  geom_point(size = 0.2) +
-  scale_color_gradientn(
-    colours = colorRampPalette(col_man)(100),
-    limits = quantile(df$HippoScore1, c(0.05, 0.95), na.rm = TRUE),
-    name = "HippoScore"
-  ) +
-  theme_classic()
-p2 <- ggplot(df, aes(x = UMAP_1, y = UMAP_2, color = SignatureScore2)) +
-  geom_point(size = 0.2) +
-  scale_color_gradientn(
-    colours = colorRampPalette(col_man)(100),
-    limits = quantile(df$SignatureScore2, c(0.05, 0.95), na.rm = TRUE),
-    name = "SignatureScore"
-  ) +
-  theme_classic()
-
-library(patchwork)
-
-p1 + p2
-
-#Figure 5F
-##Truli treatment
-Truli_ALP <- read.xlsx("Truli.xlsx", 
-                       sheetIndex = 1, header=TRUE)
-
-library(dplyr)
-library(tidyverse)
-df.summary <- Truli_ALP %>%
-  group_by(Conditions) %>%
-  summarise(
-    sd = sd(Data, na.rm = TRUE),
-    Data = mean(Data)
-  )
-df.summary
-
-library(ggplot2)
-# Default bar plot
-conditions <- c("UT", "AD10_DMSO", "AD10_0.125uM", "DD8_DMSO", "DD8_0.125uM","CB4_DMSO", "CB4_0.125uM","CD8_DMSO", "CD8_0.125uM")
-
-ggplot(Truli_ALP, aes(Conditions, Data)) + scale_x_discrete(limits = conditions)+ 
-  geom_bar(stat = "identity", data = df.summary,
-           fill = NA, color = "black") +
-  geom_jitter( position = position_jitter(0.2),
-               color = "black") + 
-  geom_errorbar(
-    aes(ymin = Data-sd, ymax = Data+sd),
-    data = df.summary, width = 0.2) 
-#check significance
-
-# AD10
-t.test(
-  Data ~ Conditions,
-  data = Truli_ALP %>% filter(Conditions %in% c("AD10_DMSO", "AD10_0.125uM"))
-)
-
-# DD8
-t.test(
-  Data ~ Conditions,
-  data = Truli_ALP %>% filter(Conditions %in% c("DD8_DMSO", "DD8_0.125uM"))
-)
-
-# CB4
-t.test(
-  Data ~ Conditions,
-  data = Truli_ALP %>% filter(Conditions %in% c("CB4_DMSO", "CB4_0.125uM"))
-)
-
-# CD8
-t.test(
-  Data ~ Conditions,
-  data = Truli_ALP %>% filter(Conditions %in% c("CD8_DMSO", "CD8_0.125uM"))
-)
-
-#Celastrol treatment
-Celastrol_ALP <- read.xlsx("Celastrol.xlsx", 
-                           sheetIndex = 1, header=TRUE)
-library(dplyr)
-df.summary <- Celastrol_ALP %>%
-  group_by(Conditions) %>%
-  summarise(
-    sd = sd(Data, na.rm = TRUE),
-    Data = mean(Data)
-  )
-df.summary
-
-library(ggplot2)
-# Default bar plot
-conditions <- c("UT", "AD10_DMSO", "AD10_0.03uM", "DD8_DMSO", "DD8_0.03uM","CB4_DMSO", "CB4_0.03uM","CD8_DMSO", "CD8_0.03uM")
-
-ggplot(Celastrol_ALP, aes(Conditions, Data)) + scale_x_discrete(limits = conditions)+ 
-  geom_bar(stat = "identity", data = df.summary,
-           fill = NA, color = "black") +
-  geom_jitter( position = position_jitter(0.2),
-               color = "black") + 
-  geom_errorbar(
-    aes(ymin = Data-sd, ymax = Data+sd),
-    data = df.summary, width = 0.2) 
-	
-##check significance
-
-# AD10
-t.test(
-  Data ~ Conditions,
-  data = Celastrol_ALP %>% filter(Conditions %in% c("AD10_DMSO", "AD10_0.03uM"))
-)
-
-# DD8
-t.test(
-  Data ~ Conditions,
-  data = Celastrol_ALP %>% filter(Conditions %in% c("DD8_DMSO", "DD8_0.03uM"))
-)
-
-# CB4
-t.test(
-  Data ~ Conditions,
-  data = Celastrol_ALP %>% filter(Conditions %in% c("CB4_DMSO", "CB4_0.03uM"))
-)
-
-# CD8
-t.test(
-  Data ~ Conditions,
-  data = Celastrol_ALP %>% filter(Conditions %in% c("CD8_DMSO", "CD8_0.03uM"))
-)
-
-
-#Figure 5G
-library("xlsx")
-library(ggplot2)
-library(dplyr)
-library(tidyverse)
-
-df.summary <- Truli_ALP %>%
-  group_by(Conditions) %>%
-  summarise(
-    sd = sd(Data, na.rm = TRUE),
-    Data = mean(Data)
-  )
-df.summary
-
-
-df.summary <- df.summary %>%
-  mutate(
-    cell_line = sub("_.*", "", Conditions),
-    treatment = sub(".*_", "", Conditions)
-  )
-
-
-gain_df <- df.summary %>%
-  filter(treatment %in% c("DMSO", "0.125uM")) %>%
-  select(cell_line, treatment, Data) %>%
-  pivot_wider(
-    names_from = treatment,
-    values_from = Data
-  ) %>%
-  mutate(gain = `0.125uM` / DMSO)
-
-gain_df
-
-gain_fixed <- gain_df %>%
-  group_by(cell_line) %>%
-  summarise(
-    DMSO = max(DMSO, na.rm = TRUE),
-    `0.125uM` = max(`0.125uM`, na.rm = TRUE),
-    gain = `0.125uM` / DMSO,
-    .groups = "drop"
-  )
-
-gain_fixed <- gain_fixed %>%
-  mutate(
-    gain_pct = (gain - 1) * 100
-  )
-gain_fixed$cell_line <- factor(
-  gain_fixed$cell_line,
-  levels = c("AD10", "DD8", "CB4", "CD8")
-)
-ggplot(gain_fixed, aes(x = cell_line, y = gain_pct)) +
-  geom_col(fill = "grey70", color = "black") +
-  theme_minimal() +
-  labs(
-    title = "Gain relative to DMSO",
-    y = "Gain (%) vs DMSO",
-    x = "Cell line"
-  ) +
-  geom_hline(yintercept = 0, linetype = "dashed")
-
-gain_fixed_truli <- gain_fixed
-
-
-##Celastrol
-df.summary <- Celastrol_ALP %>%
-  group_by(Conditions) %>%
-  summarise(
-    sd = sd(Data, na.rm = TRUE),
-    Data = mean(Data)
-  )
-df.summary
-
-df.summary <- df.summary %>%
-  mutate(
-    cell_line = sub("_.*", "", Conditions),
-    treatment = sub(".*_", "", Conditions)
-  )
-gain_df <- df.summary %>%
-  filter(treatment %in% c("DMSO", "0.03uM")) %>%
-  select(cell_line, treatment, Data) %>%
-  pivot_wider(
-    names_from = treatment,
-    values_from = Data
-  ) %>%
-  mutate(gain = `0.03uM` / DMSO)
-
-gain_df
-
-gain_fixed <- gain_df %>%
-  group_by(cell_line) %>%
-  summarise(
-    DMSO = max(DMSO, na.rm = TRUE),
-    `0.03uM` = max(`0.03uM`, na.rm = TRUE),
-    gain = `0.03uM` / DMSO,
-    .groups = "drop"
-  )
-
-gain_fixed <- gain_fixed %>%
-  mutate(
-    gain_pct = (gain - 1) * 100
-  )
-gain_fixed$cell_line <- factor(
-  gain_fixed$cell_line,
-  levels = c("AD10", "DD8", "CB4", "CD8")
-)
-ggplot(gain_fixed, aes(x = cell_line, y = gain_pct)) +
-  geom_col(fill = "grey70", color = "black") +
-  theme_minimal() +
-  labs(
-    title = "Loss relative to DMSO",
-    y = "Loss (%) vs DMSO",
-    x = "Cell line"
-  ) +
-  geom_hline(yintercept = 0, linetype = "dashed")
-
-gain_fixed_cel   <- gain_fixed
-
-##plot gain vs loss
-
-gain_merged <- gain_fixed_truli %>%
-  select(cell_line, truli_gain_pct = gain_pct) %>%
-  left_join(
-    gain_fixed_cel %>%
-      select(cell_line, cel_loss_pct = gain_pct),
-    by = "cell_line"
-  )
-
-gain_merged
-
-
-ggplot(gain_merged,
-       aes(x = truli_gain_pct, y = cel_loss_pct, label = cell_line)) +
-  geom_point(size = 3) +
-  geom_text(vjust = -0.8, size = 4) +
-  
-  # zero reference lines
-  geom_hline(yintercept = 0, linetype = "dashed", color = "grey50") +
-  geom_vline(xintercept = 0, linetype = "dashed", color = "grey50") +
-  
-  # expected opposing-response line
-  geom_abline(intercept = 0, slope = -1,
-              linetype = "dotted", color = "black") +
-  
-  theme_minimal() +
-  labs(
-    x = "Gain with Truli (% vs DMSO)",
-    y = "Loss with Celastrol (% vs DMSO)",
-    title = "Opposing effects of Hippo pathway activation and inhibition on ALP activity"
-  )
-
-
-
-# Figure 5H
-
-HIPPO_signature <- c("NTRK2","TEAD1","PLCB1","PDGFRB","GNAS","TCF7L2","TCF7L1","PRKAR1A","PRKCE","IGF1R","GNAI2","PRKCH","SMAD3","CDH6","EGFR","SMAD2","GNAQ","SAV1","MAPK10","MAP4K3","CTNNA1","YWHAQ")
-
-HIPPO_target <- c("CCN1", "PEA15", "NPPB","EPHA2", "NUAK2", "FAM107B","ANKRD1", "MYOF", "TSPAN4", "PARVA", "RBM14","CENATAC","GPRC5A","KRT7", "KRT18","HSPB8","CRY1","SAMD4A","SNAPC1","TPM1","DUSP14","LDLR",
-"SYDE1", "NFKBID","CRIM1","KMT5A","RND3","AMOTL2","PIM1","CPA4","CYRIB","MIR622","UGCG","TCEAL9","PIM2","FLNA")
-
-
-# TERT cells
-final.TERT <- read.delim("final.TERT.txt",h=T)
-# Update annotation of TERT object
-library(org.Hs.eg.db)
-library(AnnotationDbi)
-
-alias_map <- AnnotationDbi::select(
-  org.Hs.eg.db,
-  keys = unique(final.TERT$SYMBOL),
-  columns = c("SYMBOL"),
-  keytype = "ALIAS"
-)
-  
-alias_map <- alias_map[!duplicated(alias_map$ALIAS), ]
-  
-final.TERT$Symbol_canonical <- alias_map$SYMBOL[match(final.TERT$SYMBOL, alias_map$ALIAS)]
-final.TERT$Symbol_canonical[is.na(final.TERT$Symbol_canonical)] <- final.TERT$SYMBOL[is.na(final.TERT$Symbol_canonical)]
-
-length(unique(final.TERT$SYMBOL))
-length(unique(final.TERT$Symbol_canonical))
-
-boxplot(final.TERT[final.TERT$Symbol_canonical %in% HIPPO_target,"log2FC_Ob14d"],
-        final.TERT[final.TERT$Symbol_canonical %in% HIPPO_signature,"log2FC_Ob14d"],
-        final.TERT[final.TERT$Symbol_canonical %in% HIPPO_target,"log2FC_Ob7d"],
-        final.TERT[final.TERT$Symbol_canonical %in% HIPPO_signature,"log2FC_Ob7d"],
-        final.TERT[final.TERT$Symbol_canonical %in% HIPPO_target,"log2FC_Ob3d"],
-        final.TERT[final.TERT$Symbol_canonical %in% HIPPO_signature,"log2FC_Ob3d"],
-        final.TERT[final.TERT$Symbol_canonical %in% HIPPO_target,"log2FC_Ob1d"],
-        final.TERT[final.TERT$Symbol_canonical %in% HIPPO_signature,"log2FC_Ob1d"],
-        final.TERT[final.TERT$Symbol_canonical %in% HIPPO_target,"log2FC_Ob4h"],
-        final.TERT[final.TERT$Symbol_canonical %in% HIPPO_signature,"log2FC_Ob4h"],
-        final.TERT[final.TERT$Symbol_canonical %in% HIPPO_target,"log2FC_Ad4h"],
-        final.TERT[final.TERT$Symbol_canonical %in% HIPPO_signature,"log2FC_Ad4h"],
-        final.TERT[final.TERT$Symbol_canonical %in% HIPPO_target,"log2FC_Ad1d"],
-        final.TERT[final.TERT$Symbol_canonical %in% HIPPO_signature,"log2FC_Ad1d"],
-        final.TERT[final.TERT$Symbol_canonical %in% HIPPO_target,"log2FC_Ad3d"],
-        final.TERT[final.TERT$Symbol_canonical %in% HIPPO_signature,"log2FC_Ad3d"],
-        final.TERT[final.TERT$Symbol_canonical %in% HIPPO_target,"log2FC_Ad7d"],
-        final.TERT[final.TERT$Symbol_canonical %in% HIPPO_signature,"log2FC_Ad7d"],
-        final.TERT[final.TERT$Symbol_canonical %in% HIPPO_target,"log2FC_Ad14d"],
-        final.TERT[final.TERT$Symbol_canonical %in% HIPPO_signature,"log2FC_Ad14d"],
-        col=c('blue','lightblue','blue','lightblue','blue','lightblue','blue','lightblue','blue','lightblue','red','salmon','red','salmon','red','salmon','red','salmon','red','salmon')
-        )
-abline(h=0, lty=2)
-legend(
-  "topright",
-  legend = c("Target (Osteogenic)", "Signature (Osteogenic)",
-             "Target (Adipogenic)", "Signature (Adipogenic)"),
-  fill = c("blue", "lightblue", "red", "salmon"),
-  border = "black",
-  cex = 0.8
-)
-
-
-wilcox.test(final.TERT[final.TERT$Symbol_canonical %in% HIPPO_target,"log2FC_Ob14d"],
-            final.TERT[final.TERT$Symbol_canonical %in% HIPPO_signature,"log2FC_Ob14d"])
-wilcox.test(final.TERT[final.TERT$Symbol_canonical %in% HIPPO_target,"log2FC_Ob7d"],
-            final.TERT[final.TERT$Symbol_canonical %in% HIPPO_signature,"log2FC_Ob7d"])
-wilcox.test(final.TERT[final.TERT$Symbol_canonical %in% HIPPO_target,"log2FC_Ob3d"],
-            final.TERT[final.TERT$Symbol_canonical %in% HIPPO_signature,"log2FC_Ob3d"])
-wilcox.test(final.TERT[final.TERT$Symbol_canonical %in% HIPPO_target,"log2FC_Ob1d"],
-            final.TERT[final.TERT$Symbol_canonical %in% HIPPO_signature,"log2FC_Ob1d"])
-wilcox.test(final.TERT[final.TERT$Symbol_canonical %in% HIPPO_target,"log2FC_Ob4h"],
-            final.TERT[final.TERT$Symbol_canonical %in% HIPPO_signature,"log2FC_Ob4h"])
-wilcox.test(final.TERT[final.TERT$Symbol_canonical %in% HIPPO_target,"log2FC_Ad4h"],
-            final.TERT[final.TERT$Symbol_canonical %in% HIPPO_signature,"log2FC_Ad4h"])
-wilcox.test(final.TERT[final.TERT$Symbol_canonical %in% HIPPO_target,"log2FC_Ad1d"],
-            final.TERT[final.TERT$Symbol_canonical %in% HIPPO_signature,"log2FC_Ad1d"])
-wilcox.test(final.TERT[final.TERT$Symbol_canonical %in% HIPPO_target,"log2FC_Ad3d"],
-            final.TERT[final.TERT$Symbol_canonical %in% HIPPO_signature,"log2FC_Ad3d"])
-wilcox.test(final.TERT[final.TERT$Symbol_canonical %in% HIPPO_target,"log2FC_Ad7d"],
-            final.TERT[final.TERT$Symbol_canonical %in% HIPPO_signature,"log2FC_Ad7d"])
-wilcox.test(final.TERT[final.TERT$Symbol_canonical %in% HIPPO_target,"log2FC_Ad14d"],
-            final.TERT[final.TERT$Symbol_canonical %in% HIPPO_signature,"log2FC_Ad14d"])
-
-
-#Figure 5I
-#load the following object
-library(R.utils)
-GSE253355 <- readRDS("GSE253355_MSC_Subset_Seurat.rds")
-DimPlot(GSE253355)
-
-ggplot(df, aes(mscumapdim50_1, mscumapdim50_2, color = CytoTRACE_score)) +
-  geom_point(size = 0.15) +
-  scale_color_gradientn(
-    colours = colorRampPalette(col_man)(100),
-    limits = range(df$CytoTRACE_score, na.rm = TRUE),
-    name = "CytoTRACE_score"
-  ) +
-  theme_classic()
-
-
-
-#Figure 5J
-# Adding HIPPO_target and HIPPO signature to the object
-GSE253355 <- AddModuleScore(
-  object = GSE253355,
-  features = list(HIPPO_target),
-  name = "HIPPO_target"
-)
-
-GSE253355 <- AddModuleScore(
-  object = GSE253355,
-  features = list(HIPPO_signature),
-  name = "HIPPO_signature"
-)
-
-VlnPlot(GSE253355, "HIPPO_signature1", pt.size = 0)
-VlnPlot(GSE253355, "HIPPO_target1", pt.size = 0)
-
-#Figure 5K
-col_man <- c(rev(RColorBrewer::brewer.pal(8,"Spectral"))[8])
-
-library(ggplot2)
-
-df <- FetchData(
-  GSE253355,
-  vars = c("mscumapdim50_1", "mscumapdim50_2", "HIPPO_signature1","HIPPO_target1","CytoTRACE_score")
-)
-
-ggplot(df, aes(mscumapdim50_1, mscumapdim50_2, color = HIPPO_target1)) +
-  geom_point(size = 0.15) +
-  scale_color_gradientn(
-    colours = colorRampPalette(col_man)(100),
-    limits = range(df$HIPPO_target1, na.rm = TRUE),
-    name = "HIPPO_target1"
-  ) +
-  theme_classic()
-
-ggplot(df, aes(mscumapdim50_1, mscumapdim50_2, color = Atenisa1)) +
-  geom_point(size = 0.15) +
-  scale_color_gradientn(
-    colours = colorRampPalette(col_man)(100),
-    limits = range(df$Atenisa1, na.rm = TRUE),
-    name = "HIPPO_signature1"
-  ) +
-  theme_classic()
-  
-rm(df,p,col_man)
-
-##Figure 5L
-#Implant inhibitors
-
-data <- read.delim("Implant_Inhibitor.txt",h=T)
-data$Position <- factor(data$Position, levels=c('LF','RF','LR','RR'))
-data$Treatment <- factor(data$Treatment, levels= c('DMSO','Celstrol','TDI_5uM'))
-data$Clones <- factor(data$Clones, levels=c('DD8','CB4'))
-
-data$Cl_Treat <- paste(data$Clones,data$Treatment,sep="_")
-data$Cl_Treat <- factor(data$Cl_Treat, levels=c('DD8_DMSO','DD8_Celstrol','DD8_TDI_5uM','DD8_TDI_1uM','CB4_DMSO','CB4_Celstrol','CB4_TDI_5uM','CB4_TDI_1uM'))
-
-data_mean <- c()
-data_sd <- c()
-
-for (i in levels(data$Cl_Treat)){
-  tmp <- data[data$Cl_Treat ==i,]
-  data_mean <- c(data_mean,mean(tmp$BonePerTissue))
-  data_sd <- c(data_sd,sd(tmp$BonePerTissue))
-}
-
-
-bp <- barplot(data_mean,  ylim=c(0,max(data$BonePerTissue+0.05)), names.arg = levels(data$Cl_Treat))
-points(bp[as.numeric(data$Cl_Treat)],data$BonePerTissue,at=bp, pch=as.numeric(data$Position))
-arrows(bp,data_mean,bp,(data_mean+data_sd),lwd=1.5, angle=90, length=0.05, code=2)
-
-t.test(data[data$Cl_Treat=="DD8_DMSO","BonePerTissue"],data[data$Cl_Treat=="DD8_Celstrol","BonePerTissue"])
-t.test(data[data$Cl_Treat=="DD8_DMSO","BonePerTissue"],data[data$Cl_Treat=="DD8_TDI_5uM","BonePerTissue"])
-
-t.test(data[data$Cl_Treat=="CB4_DMSO","BonePerTissue"],data[data$Cl_Treat=="CB4_Celstrol","BonePerTissue"])
-t.test(data[data$Cl_Treat=="CB4_DMSO","BonePerTissue"],data[data$Cl_Treat=="CB4_TDI_5uM","BonePerTissue"])
-
-plot(1:8,data_mean, xlab="", ylab="", xaxt="none")
-#axis(1,at=c(1:5),labels = c('D100','D75C25','D50C50','D25C75','C100'),las=2)
-lines(c(1:8,1:8),c(data_mean - data_sd,data_mean + data_sd), lty=2)
-lines(1:8,data_mean - data_sd, lty=2)
-abline(1.25,-0.25, lty=3)
-
 # Final aesthetics were done in Illustrator
-
